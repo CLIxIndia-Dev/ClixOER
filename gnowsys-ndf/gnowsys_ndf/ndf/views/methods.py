@@ -1,4 +1,4 @@
-' -- imports from python libraries -- '
+''' -- imports from python libraries -- '''
 # import os -- Keep such imports here
 import datetime
 import time
@@ -39,6 +39,12 @@ from django.template.loader import render_to_string
 from django.shortcuts import render
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.exceptions import PermissionDenied
+
+from gnowsys_ndf.settings import GSTUDIO_ELASTICSEARCH
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search,connections,Q
+import json
+client = Elasticsearch('banta_i:9200')
 
 ''' -- imports from application folders/files -- '''
 from gnowsys_ndf.settings import META_TYPE, GSTUDIO_NROER_GAPPS, GSTUDIO_IMPLICIT_ENROLL
@@ -321,6 +327,7 @@ def capture_data(file_object=None, file_data=None, content_type=None,time=None):
 
 @get_execution_time
 def get_group_name_id(group_name_or_id, get_obj=False):
+    print group_name_or_id,"gggggggggggggggggggg"
     '''
       - This method takes possible group name/id as an argument and returns (group-name and id) or group object.
 
@@ -355,9 +362,22 @@ def get_group_name_id(group_name_or_id, get_obj=False):
 
     # case-1: argument - "group_name_or_id" is ObjectId
     if ObjectId.is_valid(group_name_or_id):
-
-        group_obj = node_collection.one({"_id": ObjectId(group_name_or_id)})
-
+        if GSTUDIO_ELASTICSEARCH:
+            print "essssssssssssssssssss 366 methods.py"
+            print group_name_or_id
+            print "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"
+            group_name_or_id = str(group_name_or_id)
+            q = Q("match",id = group_name_or_id)
+            print q
+            print "ppppppppppppppppppppppppppppppppp"
+            s = Search(index = 'nodes').using(client).query(q)
+            res = s.execute()
+            for hit in res:
+                group_obj = hit
+                print group_obj
+        else:
+            print "mdddddddddddddddddddd 377 methods.py"
+            group_obj = node_collection.one({"_id": ObjectId(group_name_or_id)})
         # checking if group_obj is valid
         if group_obj:
             # if (group_name_or_id == group_obj._id):
@@ -375,14 +395,37 @@ def get_group_name_id(group_name_or_id, get_obj=False):
 
     # case-2: argument - "group_name_or_id" is group name
     else:
-        group_obj = node_collection.one(
-            {"_type": {"$in": ["Group", "Author"]}, "name": unicode(group_name_or_id)})
+        if GSTUDIO_ELASTICSEARCH:
+            print "essssssssssssssssssss 397 methods.py"
+            print unicode(group_name_or_id)
+            q1 = Q("match", name=unicode(group_name_or_id))
+            q2 = Q("match", type = "Group")|Q("match", type = "Author")
+            print q2,"q2222222222222222"
+            print q1,"q1111111111111111"
+            q3 = q2&q1
+            print q3, "q333333333333333"
+            s = Search(index = 'nodes').using(client).query(q3)
+            print s,"sssssssssssssssssss"
+            res = s.execute()
+            print res,"rrrrrrrrrrrrrrrrrrr"
+            print s.count()
+            for hit in res:
+                print "1"
+                group_obj = hit
+                print group_obj
+        else:
+            print "mdddddddddddddddddddd 413 methods.py"
+            group_obj = node_collection.one({"name": unicode(group_name_or_id),
+                    "_type": {"$in": ["Group", "Author"]}})
 
         # checking if group_obj is valid
         if group_obj:
             # if (group_name_or_id == group_obj.name):
             group_name = group_name_or_id
-            group_id = group_obj._id
+            if GSTUDIO_ELASTICSEARCH:
+                group_id = group_obj.id
+            else:
+                group_id = group_obj._id    
 
             if get_obj:
                 return group_obj
@@ -2085,10 +2128,7 @@ def cast_to_data_type(value, data_type):
     # print "\n\t\tin method: ", value, " == ", data_type
 
     if data_type != "list":
-        try:
-            value = value.strip()
-        except Exception as e:
-            pass
+      value = value.strip()
     casted_value = value
     if data_type == "unicode":
         casted_value = unicode(value)
@@ -2129,20 +2169,11 @@ def cast_to_data_type(value, data_type):
             casted_value = [i.strip() for i in value if i]
             # print "casted_value",casted_value
 
-    elif (data_type == "datetime.datetime") or (str(data_type) == "<type 'datetime.datetime'>"):
-        try:
-            # "value" should be in following example format
-            # In [10]: datetime.strptime( "11/12/2014", "%d/%m/%Y")
-            # Out[10]: datetime(2014, 12, 11, 0, 0)
-            casted_value = datetime.strptime(value, "%d/%m/%Y")
-        except Exception as e:
-            casted_value = datetime.strptime(value, "%d/%m/%Y %H:%M:%S:%f")
-
-    elif (str(data_type) == "<class 'bson.objectid.ObjectId'>") or isinstance(data_type, (ObjectId, bson.objectid.ObjectId)):
-        try:
-            casted_value = ObjectId(value)
-        except Exception as e:
-            pass
+    elif data_type == "datetime.datetime":
+        # "value" should be in following example format
+        # In [10]: datetime.strptime( "11/12/2014", "%d/%m/%Y")
+        # Out[10]: datetime(2014, 12, 11, 0, 0)
+        casted_value = datetime.strptime(value, "%d/%m/%Y")
 
     return casted_value
 
@@ -2641,11 +2672,10 @@ def create_gattribute(subject_id, attribute_type_node, object_value=None, **kwar
     old_object_value = None
     triple_scope_val = kwargs.get('triple_scope', None)
     try:
-        print attribute_type_node,AttributeType
         attribute_type_node = Node.get_node_obj_from_id_or_obj(attribute_type_node, AttributeType)
     except Exception:
         attribute_type_node = Node.get_name_id_from_type(attribute_type_node, 'AttributeType', get_obj=True)
-    print "\nattribute_type_node: ", attribute_type_node.name
+    # print "\nattribute_type_node: ", attribute_type_node.name
     ga_node = triple_collection.one(
         {'_type': "GAttribute", 'subject': subject_id, 'attribute_type': attribute_type_node._id})
 
@@ -2659,6 +2689,7 @@ def create_gattribute(subject_id, attribute_type_node, object_value=None, **kwar
       }
 
     '''
+
     if ga_node is None:
         # Code for creation
         try:
@@ -2677,8 +2708,6 @@ def create_gattribute(subject_id, attribute_type_node, object_value=None, **kwar
                 ga_node.status = u"PUBLISHED"
 
             ga_node.object_value = object_value
-            print ga_node
-            
             # ga_node.save(triple_node=attribute_type_node, triple_id=attribute_type_node._id)
             ga_node.save()
             if triple_scope_val:
@@ -2708,7 +2737,6 @@ def create_gattribute(subject_id, attribute_type_node, object_value=None, **kwar
     else:
         # Code for updating existing gattribute
         is_ga_node_changed = False
-        print "ga node changd",is_ga_node_changed
         try:
             if (not object_value) and type(object_value) != bool:
                 # this is when value of attribute is cleared/empty
@@ -2729,23 +2757,17 @@ def create_gattribute(subject_id, attribute_type_node, object_value=None, **kwar
                 node_collection.collection.update({'_id': subject_id, 'attribute_set.' + attribute_type_node.name: old_object_value}, {'$pull': {'attribute_set': {attribute_type_node.name: old_object_value}}}, upsert=False, multi=False)
 
             else:
-                print "inside else"
                 if type(ga_node.object_value) == list:
-                    print "inside list condtn"
                     if type(ga_node.object_value[0]) == dict:
                         old_object_value = ga_node.object_value
 
                         if len(old_object_value) != len(object_value):
                             ga_node.object_value = object_value
-                            print "changing the ga node changed"
                             is_ga_node_changed = True
 
                         else:
-                            #print "Old value and new value:",old_object_value,'\n',object_value
                             pairs = zip(old_object_value, object_value)
-                            #print "pairs:",pairs
                             if any(x != y for x, y in pairs):
-                                print "change ga node in else"
                                 ga_node.object_value = object_value
                                 is_ga_node_changed = True
 
@@ -2831,15 +2853,11 @@ def create_gattribute(subject_id, attribute_type_node, object_value=None, **kwar
             error_message = "\n GAttributeUpdateError: " + str(e) + "\n"
             raise Exception(error_message)
 
-    print "\n\t is_ga_node_changed: ", is_ga_node_changed,'\t',attribute_type_node.name,'\t',subject_id,'\t',object_value
-    if is_ga_node_changed:
-        from cache import invalidate_set_cache
-        cache_key = str(subject_id) + 'attribute_value' + str(attribute_type_node.name)
-        invalidate_set_cache(cache_key)
-        # if cache.get(cache_key):
-        #     #cache.delete(cache_key)
-        #     cache.set(cache_key, [{u'origin': [], u'rating': [], u'agency_type': u'Other', u'contributors': [1], u'relation_set': [{u'has_banner_pic': [ObjectId('59425c0b4975ac013eac3c50')]}], u'start_publication': None, u'property_order': [], u'featured': None, u'legal': {u'license': u'HBCSE', u'copyright': u'CC-BY-SA 4.0 unported'}, u'subscription_policy': u'OPEN', u'modified_by': 1, u'project_config': {u'subsection_name': u'Add from Activities', u'tab_name': u'Lessons', u'resource_name': u'Resources', u'section_name': u'Lesson', u'blog_name': u'e-Notes'}, u'comment_enabled': None, u'altnames': u'Unit 1: English Beginner', u'post_node': [], u'created_by': 1, u'last_update': datetime.datetime(2019, 1, 8, 13, 11, 15, 592000), u'content': u'This is a unit with story-based lessons to improve listening skills and provide simple speaking practice.', u'disclosure_policy': u'DISCLOSED_TO_MEM', u'snapshot': {u'5943fd564975ac013d36fdae': u'1.38'}, u'module_set': [], u'plural': u'', u'annotations': [], u'group_type': u'PUBLIC', u'location': [], u'status': u'PUBLISHED', u'login_required': None, u'_type': u'Group', u'tags': [], u'collection_set': [ObjectId('5943fd574975ac013d36fdb8'), ObjectId('5943fd5d4975ac013d36fdf3'), ObjectId('5943fd634975ac013d36fe2a'), ObjectId('5943fd694975ac013d36fe61'), ObjectId('5943fd6f4975ac013d36fe98'), ObjectId('5943fd754975ac013d36fecf'), ObjectId('5943fd7b4975ac013d36ff06'), ObjectId('5943fd814975ac013d36ff3d'), ObjectId('5943fd874975ac013d36ff74'), ObjectId('5943fd8d4975ac013d36ffab'), ObjectId('5943fd934975ac013d36ffe2'), ObjectId('5a8b9b9c69602a0154bd46d4'), ObjectId('5a77d5c869602a014f498a2c')], u'encryption_policy': u'NOT_ENCRYPTED', u'prior_node': [ObjectId('5945db6e2c4796014abd1784')], u'if_file': {u'thumbnail': {u'id': None, u'relurl': None}, u'mid': {u'id': None, u'relurl': None}, u'mime_type': None, u'original': {u'id': None, u'relurl': None}}, u'moderation_level': -1, u'edit_policy': u'EDITABLE_MODERATED', u'_id': ObjectId('5943fd564975ac013d36fdae'), u'name': u'eb-unit1-english-beginner', u'language': [u'en', u'English'], u'member_of': [ObjectId('5945b7ca2c47960723f3ee8c')], u'url': u'', u'created_at': datetime.datetime(2017, 6, 17, 2, 46, 30, 125000), u'group_set': [ObjectId('5943fd564975ac013d36fdae')], u'author_set': [1, None], u'visibility_policy': u'ANNOUNCED', u'group_admin': [1], u'attribute_set': [{u'educationalsubject': u'English'}, {u'educationallevel': u'Grade 9'}, {u'assessment_list': [[u'assessment.Bank:57ea291ab3fcec1309c4ef7b@ODL.MIT.EDU', u'assessment.AssessmentOffered:57ff5b75b3fcec148d8e3d6f@ODL.MIT.EDU'], [u'assessment.Bank:57eb9a35b3fcec04647ef02e@ODL.MIT.EDU', u'assessment.AssessmentOffered:58f7207891d0d963d9e76927@ODL.MIT.EDU'], [u'assessment.Bank:57ea257eb3fcec1309c4edf2@ODL.MIT.EDU', u'assessment.AssessmentOffered:580357f5b3fcec3a484f621d@ODL.MIT.EDU'], [u'assessment.Bank:57ea2931b3fcec1309c4ef91@ODL.MIT.EDU', u'assessment.AssessmentOffered:58b5a3cf91d0d978b4297837@ODL.MIT.EDU'], [u'assessment.Bank:57e526c2b3fcec5f10d00d48@ODL.MIT.EDU', u'assessment.AssessmentOffered:57e90d2ab3fcec1309c4e5f7@ODL.MIT.EDU'], [u'assessment.Bank:57ea2811b3fcec1309c4ee8a@ODL.MIT.EDU', u'assessment.AssessmentOffered:5850169191d0d90bee1907b8@ODL.MIT.EDU'], [u'assessment.Bank:57ed0360b3fcec0ee7647ad4@ODL.MIT.EDU', u'assessment.AssessmentOffered:57ffeaaab3fcec148d8e4aa2@ODL.MIT.EDU'], [u'assessment.Bank:57e8f2c9b3fcec1309c4db39@ODL.MIT.EDU', u'assessment.AssessmentOffered:58e7408391d0d9463059c9f7@ODL.MIT.EDU'], [u'assessment.Bank:57ea25b2b3fcec1309c4ee2f@ODL.MIT.EDU', u'assessment.AssessmentOffered:580fb066b3fcec715a280382@ODL.MIT.EDU'], [u'assessment.Bank:57f89969b3fcec3154d6cf72@ODL.MIT.EDU', u'assessment.AssessmentOffered:584bc5fbb3fcec051a40ecdb@ODL.MIT.EDU'], [u'assessment.Bank:57eb9f36b3fcec04647ef0c8@ODL.MIT.EDU', u'assessment.AssessmentOffered:58fb2d7991d0d902fa689f54@ODL.MIT.EDU'], [u'assessment.Bank:57ea2814b3fcec1309c4ee99@ODL.MIT.EDU', u'assessment.AssessmentOffered:58b5a08891d0d978259e34fe@ODL.MIT.EDU'], [u'assessment.Bank:57f4c38fb3fcec3154d6b44f@ODL.MIT.EDU', u'assessment.AssessmentOffered:57ff87f2b3fcec148d8e433d@ODL.MIT.EDU'], [u'assessment.Bank:57f163f4b3fcec3154d6ae72@ODL.MIT.EDU', u'assessment.AssessmentOffered:57f167a9b3fcec3154d6b090@ODL.MIT.EDU'], [u'assessment.Bank:57f164a6b3fcec3154d6af11@ODL.MIT.EDU', u'assessment.AssessmentOffered:57f748acb3fcec3154d6cc52@ODL.MIT.EDU'], [u'assessment.Bank:57ea2024b3fcec1309c4eb62@ODL.MIT.EDU', u'assessment.AssessmentOffered:58fb34b391d0d902fd3f291a@ODL.MIT.EDU'], [u'assessment.Bank:57ea1fd5b3fcec1309c4eae4@ODL.MIT.EDU', u'assessment.AssessmentOffered:58e9c81391d0d96a54b73414@ODL.MIT.EDU'], [u'assessment.Bank:57ee5130b3fcec154609f103@ODL.MIT.EDU', u'assessment.AssessmentOffered:57f748ddb3fcec3154d6cc5f@ODL.MIT.EDU'], [u'assessment.Bank:57ee4b6ab3fcec154609eddc@ODL.MIT.EDU', u'assessment.AssessmentOffered:57ff94d3b3fcec148d8e44df@ODL.MIT.EDU']]}, {u'total_assessment_items': 53}], u'access_policy': u'PUBLIC', u'type_of': [ObjectId('5752ad552e01310a05dca4a5')], u'content_org': u''}, {u'origin': [], u'rating': [], u'agency_type': u'Other', u'contributors': [1], u'relation_set': [{u'has_banner_pic': [ObjectId('59425c0b4975ac013eac3c50')]}], u'start_publication': None, u'property_order': [], u'featured': None, u'legal': {u'license': u'HBCSE', u'copyright': u'CC-BY-SA 4.0 unported'}, u'subscription_policy': u'OPEN', u'modified_by': 1, u'project_config': {u'subsection_name': u'Add from Activities', u'tab_name': u'Lessons', u'resource_name': u'Resources', u'section_name': u'Lesson', u'blog_name': u'e-Notes'}, u'comment_enabled': None, u'altnames': u'Unit 0: English Beginner', u'post_node': [], u'created_by': 1, u'last_update': datetime.datetime(2019, 2, 18, 18, 15, 53, 137000), u'content': u'This is a unit with theme-based lessons and bilingual support to build listening and vocabulary skills.&nbsp;', u'disclosure_policy': u'DISCLOSED_TO_MEM', u'snapshot': {u'59425be44975ac013cccb909': u'1.25'}, u'module_set': [], u'plural': u'', u'annotations': [], u'group_type': u'PRIVATE', u'location': [], u'status': u'PUBLISHED', u'login_required': None, u'_type': u'Group', u'tags': [], u'collection_set': [ObjectId('59425be54975ac013cccb913'), ObjectId('59425bea4975ac013cccb952'), ObjectId('59425bed4975ac013cccb97d'), ObjectId('59425bf04975ac013cccb9ac'), ObjectId('59425bf34975ac013cccb9d3'), ObjectId('59425bf64975ac013cccb9fa'), ObjectId('5a7d387769602a01562c7d58'), ObjectId('5a7d3c4a69602a01562c7eae'), ObjectId('5a7d3d1869602a0158bf6fd1'), ObjectId('5a7d3dd069602a01579b0754'), ObjectId('5a7d3ef169602a01579b08d2'), ObjectId('5a7d3ff769602a01579b0aa5')], u'encryption_policy': u'NOT_ENCRYPTED', u'prior_node': [ObjectId('59424dd84975ac013bf0f30b'), ObjectId('5945db6e2c4796014abd1784')], u'if_file': {u'mid': {u'id': None, u'relurl': None}, u'original': {u'id': None, u'relurl': None}, u'mime_type': None, u'thumbnail': {u'id': None, u'relurl': None}}, u'moderation_level': -1, u'edit_policy': u'EDITABLE_MODERATED', u'_id': ObjectId('59425be44975ac013cccb909'), u'name': u'eb-unit0-english-beginner', u'language': [u'en', u'English'], u'member_of': [ObjectId('5945b7ca2c47960723f3ee8c')], u'url': u'', u'created_at': datetime.datetime(2017, 6, 15, 21, 5, 24, 730000), u'group_set': [ObjectId('59425be44975ac013cccb909')], u'author_set': [1, 1260193, None, 1260189], u'visibility_policy': u'ANNOUNCED', u'group_admin': [1], u'attribute_set': [{u'educationalsubject': u'English'}, {u'educationallevel': u'Grade 9'}, {u'assessment_list': [[u'assessment.Bank:58bd932791d0d90b7c45de34@ODL.MIT.EDU', u'assessment.AssessmentOffered:592d507191d0d96e63037046@ODL.MIT.EDU'], [u'assessment.Bank:57eb9a35b3fcec04647ef02e@ODL.MIT.EDU', u'assessment.AssessmentOffered:58f7207891d0d963d9e76927@ODL.MIT.EDU'], [u'assessment.Bank:58bd900591d0d90b7debf2c6@ODL.MIT.EDU', u'assessment.AssessmentOffered:5922c14f91d0d9752122e398@ODL.MIT.EDU'], [u'assessment.Bank:57eb9f36b3fcec04647ef0c8@ODL.MIT.EDU', u'assessment.AssessmentOffered:58fb2d7991d0d902fa689f54@ODL.MIT.EDU'], [u'assessment.Bank:58bd900691d0d90b7c45de24@ODL.MIT.EDU', u'assessment.AssessmentOffered:5934e17f91d0d93e556f322f@ODL.MIT.EDU'], [u'assessment.Bank:58bd932891d0d90b7debf2ff@ODL.MIT.EDU', u'assessment.AssessmentOffered:59224b8491d0d9751e30b1e1@ODL.MIT.EDU'], [u'assessment.Bank:58bd900291d0d90b7c45de23@ODL.MIT.EDU', u'assessment.AssessmentOffered:592bf5c991d0d96e625c52d1@ODL.MIT.EDU'], [u'assessment.Bank:58bd900691d0d90b7c45de24@ODL.MIT.EDU', u'assessment.AssessmentOffered:591d2c5591d0d95594d99698@ODL.MIT.EDU'], [u'assessment.Bank:58bd900291d0d90b7c45de23@ODL.MIT.EDU', u'assessment.AssessmentOffered:5922b90c91d0d9751f0ab824@ODL.MIT.EDU'], [u'assessment.Bank:58bd932791d0d90b7c45de34@ODL.MIT.EDU', u'assessment.AssessmentOffered:593bf7ff91d0d942e25d5f42@ODL.MIT.EDU'], [u'assessment.Bank:58bd900591d0d90b7debf2c6@ODL.MIT.EDU', u'assessment.AssessmentOffered:5922d09591d0d97520948594@ODL.MIT.EDU'], [u'assessment.Bank:58bd900691d0d90b7c45de24@ODL.MIT.EDU', u'assessment.AssessmentOffered:591e867491d0d955938215fb@ODL.MIT.EDU'], [u'assessment.Bank:58bd900691d0d90b7c45de24@ODL.MIT.EDU', u'assessment.AssessmentOffered:591e867591d0d9559119a1f3@ODL.MIT.EDU'], [u'assessment.Bank:58bd900691d0d90b7c45de24@ODL.MIT.EDU', u'assessment.AssessmentOffered:591e867691d0d95595667cce@ODL.MIT.EDU'], [u'assessment.Bank:58bd900291d0d90b7c45de23@ODL.MIT.EDU', u'assessment.AssessmentOffered:5922756991d0d9751e30b297@ODL.MIT.EDU']]}, {u'total_assessment_items': 30}], u'access_policy': u'PRIVATE', u'type_of': [ObjectId('5752ad552e01310a05dca4a5')], u'content_org': u''}], 60 * 60)
-        
+    # print "\n\t is_ga_node_changed: ", is_ga_node_changed
+
+    # cache_key = str(subject_id) + 'attribute_value' + str(attribute_type_node.name)
+    # cache.set(cache_key, object_value, 60 * 60)
+
     if "is_changed" in kwargs:
         ga_dict = {}
         ga_dict["is_changed"] = is_ga_node_changed
@@ -4312,12 +4330,13 @@ def delete_gattribute(subject_id=None, deletion_type=0, **kwargs):
         if deletion_type == 1:
             for each_ga in gattributes:
                 gattribute_deleted_id.append(each_ga._id.__str__())
-                #print "deletntype:",gattribute_deleted_id
+
                 if each_ga.status != u"DELETED":
                     create_gattribute(each_ga.subject, each_ga.attribute_type)
-                    #print "\t 4 >> each_ga (0) ... ", each_ga._id
+                    # print "\t 4 >> each_ga (0) ... ", each_ga._id
 
-        #print "\n 5 >> gattribute_deleted_id... " + ", ".join(gattribute_deleted_id)
+        # print "\n 5 >> gattribute_deleted_id... " + ",
+        # ".join(gattribute_deleted_id)
 
         # Perform purge operation
         if deletion_type == 1:
@@ -4391,7 +4410,7 @@ def delete_gattribute(subject_id=None, deletion_type=0, **kwargs):
                     + ", ".join(gattribute_updated_id)
 
         # Return output of the function
-        print "\n 9 >> ", delete_status_message
+        # print "\n 9 >> ", delete_status_message
         return (True, delete_status_message)
     except Exception as e:
         delete_status_message = "DeleteGAttributeError: " + str(e)
@@ -4766,11 +4785,10 @@ def delete_node(
     """
 
     try:
-        print "\n 1 >> Entered in delete_node() function..."
-
+        # print "\n 1 >> Entered in delete_node() function..."
         # Convert into string format if value of some other data-type is passed
         collection_name = collection_name.__str__()
-        print node_collection.collection_name,collection_name
+
         # Check from which collection you need to delete node from
         if collection_name == node_collection.collection_name:
             # Perform deletion operation on Nodes collection
@@ -4782,19 +4800,19 @@ def delete_node(
             str_deletion_type = "deleted"
             delete_status_message = ""
 
-            print "\n 2 >> Nodes collection..."
+            # print "\n 2 >> Nodes collection..."
             if deletion_type not in [0, 1]:
                 delete_status_message = "Must pass \"deletion_type\" agrument's " \
                     + "value as either 0 (Normal delete) or 1 (Purge) !!!"
                 raise Exception(delete_status_message)
 
-            print "\t 3 >> found node_id..."
+            # print "\t 3 >> found node_id..."
             if not node_id:
                 delete_status_message = "No value found for node_id" \
                     + "... [Expected value in ObjectId format] !!!"
                 raise Exception(delete_status_message)
 
-            print "\t 3a >> convert node_id...",node_id
+            # print "\t 3a >> convert node_id..."
             # Typecast node_id from string into ObjectId,
             # if found in string format
             if type(node_id) == ObjectId:
@@ -4815,7 +4833,7 @@ def delete_node(
 
             # Forming query to delete a specific node from Nodes collection
             query = {"_id": node_id}
-            print "\t 3d >> query... ", query
+            # print "\t 3d >> query... ", query
 
             # Fetch the deleting-node from given node_id
             node_to_be_deleted = node_collection.find_one(query)
@@ -4834,7 +4852,8 @@ def delete_node(
                     + "\n\nIf required, you can still purge this node !"
                 return (True, delete_status_message)
 
-            print "\n 4 >> node to be deleted fetched successfully... ",node_to_be_deleted.name
+            # print "\n 4 >> node to be deleted fetched successfully... ",
+            # node_to_be_deleted.name
             if ((node_to_be_deleted.status == u"DELETED" and
                  deletion_type == 1) or
                     (node_to_be_deleted.status != u"DELETED")):
@@ -4884,7 +4903,7 @@ def delete_node(
                 },
                     upsert=False, multi=True
                 )
-                print "\n 7 >> collection_set : \n", res
+                # print "\n 7 >> collection_set : \n", res
 
                 # Search deleting-node's ObjectId in prior_node field and
                 # remove from it, if found any
@@ -4895,7 +4914,7 @@ def delete_node(
                 },
                     upsert=False, multi=True
                 )
-                print "\n 8 >> prior_node : \n", res
+                # print "\n 8 >> prior_node : \n", res
 
                 # Search deleting-node's ObjectId in post_node field and
                 # remove from it, if found any
@@ -4906,7 +4925,7 @@ def delete_node(
                 },
                     upsert=False, multi=True
                 )
-                print "\n 9 >> post_node : \n", res
+                # print "\n 9 >> post_node : \n", res
 
                 # Perform normal delete on deleting-node
                 # Only changes the status of given node to DELETED
@@ -4936,11 +4955,9 @@ def delete_node(
                         fh_original_id = node_to_be_deleted.if_file.original.id
                         if node_collection.find({'_type': 'GSystem', 'if_file.original.id': ObjectId(fh_original_id) }).count() == 1:
                             for each_file in ['original', 'mid', 'thumbnail']:
-                                print "inside each_file"
                                 fh_id = node_to_be_deleted.if_file[each_file]['id']
                                 fh_relurl = node_to_be_deleted.if_file[each_file]['relurl']
                                 if fh_id or fh_relurl:
-                                    print "before call of delete_file_from_filehive"
                                     Filehive.delete_file_from_filehive(fh_id, fh_relurl)
 
                 # deleting related RCS file
@@ -4953,7 +4970,6 @@ def delete_node(
                 + "%(str_deletion_type)s successfully." % locals()
             # print delete_status_message
             return (True, delete_status_message)
-                #node_to_be_deleted.delete()
 
         elif collection_name == triple_collection.collection_name:
             # Perform deletion operation on Triples collection
@@ -5587,8 +5603,12 @@ def get_course_completed_ids(list_of_all_ids,children_ids,return_completed_list,
 def get_group_join_status(group_obj):
     from gnowsys_ndf.ndf.templatetags.ndf_tags import get_attribute_value
     allow_to_join = None
-    start_enrollment_date = get_attribute_value(group_obj._id,"start_enroll")
-    last_enrollment_date = get_attribute_value(group_obj._id,"end_enroll")
+    if GSTUDIO_ELASTICSEARCH:
+        start_enrollment_date = get_attribute_value(group_obj.id,"start_enroll")
+        last_enrollment_date = get_attribute_value(group_obj.id,"end_enroll")
+    else:
+        start_enrollment_date = get_attribute_value(group_obj._id,"start_enroll")
+        last_enrollment_date = get_attribute_value(group_obj._id,"end_enroll")
     curr_date_time = datetime.now().date()
 
     if start_enrollment_date and last_enrollment_date:

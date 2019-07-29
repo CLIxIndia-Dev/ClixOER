@@ -1,5 +1,13 @@
 from base_imports import *
 from history_manager import HistoryManager
+from itertools import islice
+
+from gnowsys_ndf.settings import GSTUDIO_ELASTICSEARCH
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search,connections,Q
+import json
+client = Elasticsearch('banta_i:9200')
+
 
 @connection.register
 class Filehive(DjangoDocument):
@@ -104,6 +112,16 @@ class Filehive(DjangoDocument):
         # print "addr_obj : ", addr_obj
 
         md5 = str(addr_obj.id)
+        '''if GSTUDIO_ELASTICSEARCH:
+            print "esssssssssssssssssssssss"
+            print md5
+            print "essssssssssssssssssssssss"
+            q = Q("match",md5 = md5)
+            s = Search(index='filehives').using(client).query(q)
+            res = s.execute()
+            for hit in res:
+                filehive_obj = hit
+        else:'''
         filehive_obj = filehive_collection.find_one({'md5': md5})
         # print filehive_obj
 
@@ -120,7 +138,6 @@ class Filehive(DjangoDocument):
 
             filehive_obj.md5                 = str(md5)
             filehive_obj.relurl              = str(addr_obj.relpath)
-            print "relurl",filehive_obj.relurl
             filehive_obj.mime_type           = str(file_metadata_dict['file_mime_type'])
             filehive_obj.length              = float(file_metadata_dict['file_size'])
             filehive_obj.filename            = unicode(file_metadata_dict['file_name'])
@@ -205,7 +222,7 @@ class Filehive(DjangoDocument):
                 file_blob.seek(0, os.SEEK_END)
                 file_size = file_blob.tell()
                 file_blob.seek(0)
-        except Exception as e:
+        except Exception, e:
             print "Exception in calculating file_size: ", e
             file_size = 0
 
@@ -219,7 +236,7 @@ class Filehive(DjangoDocument):
         else:
             try:
                 image_dimension_tuple = get_image_dimensions(file_blob)
-            except Exception as e:
+            except Exception, e:
                 print "Exception in calculating file dimensions: ", e
                 pass
 
@@ -245,7 +262,12 @@ class Filehive(DjangoDocument):
             file_mime_type = file_blob.content_type
         else:
             file_blob.seek(0)
-            file_mime_type = magic.from_buffer(file_blob.read(1024), mime=True)
+            '''print file_blob.size()
+            print "jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj" '''
+            '''print temp
+            print 
+            print "0000000000000000000000000000000000000"'''
+            file_mime_type = magic.from_buffer(file_blob.read(), mime=True) 
             file_blob.seek(0)
 
         return file_mime_type
@@ -307,7 +329,7 @@ class Filehive(DjangoDocument):
 
             try:
                 img = Image.open(StringIO(files.read()))
-            except Exception as e:
+            except Exception, e:
                 print "Exception in opening file with PIL.Image.Open(): ", e
                 return None, None
 
@@ -344,7 +366,7 @@ class Filehive(DjangoDocument):
 
             return mid_size_img, img_size
 
-        except Exception as e:
+        except Exception, e:
             print "Exception in converting image to mid size: ", e
             return None
 
@@ -398,12 +420,6 @@ class Filehive(DjangoDocument):
                 raise RuntimeError(err)
 
         # --- END of storing Filehive JSON in RSC system ---
-
-          ########################## ES ##################################
-        if GSTUDIO_ELASTIC_SEARCH_IN_NODE_CLASS == True:
-            print "inside elastic search save"
-            esearch.save_to_es(self)
-
 
 
 filehive_collection = db["Filehives"].Filehive

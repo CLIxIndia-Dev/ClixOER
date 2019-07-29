@@ -12,7 +12,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-
+from gnowsys_ndf.settings import GSTUDIO_ELASTICSEARCH 
 ''' -- imports from application folders/files -- '''
 from gnowsys_ndf.ndf.models import GSystemType, Group, Node, GSystem  #, Triple
 from gnowsys_ndf.ndf.models import node_collection, triple_collection
@@ -105,10 +105,11 @@ def module_detail(request, group_id, node_id,title=""):
     '''
     detail of of selected module
     '''
+    print "in module detail view"
     group_name, group_id = Group.get_group_name_id(group_id)
-    print "in module_detail and group id, title",group_id,title
-    print "node_id",node_id          
+
     module_obj = Node.get_node_by_id(ObjectId(node_id))
+    print module_obj,title
     context_variable = {
                         'group_id': group_id, 'groupid': group_id,
                         'node': module_obj, 'title': title,
@@ -151,38 +152,26 @@ def module_detail(request, group_id, node_id,title=""):
       ]})
     '''
     primary_lang_tuple = get_language_tuple(GSTUDIO_PRIMARY_COURSE_LANGUAGE)
+    print 'dfdaf',gst_announced_unit_id, gst_ce_id
     if title == "courses":
+        module_detail_query.update({'$or': [
+        {'$and': [
+            {'member_of': {'$in': [ObjectId(gst_announced_unit_id), ObjectId(gst_ce_id)]}},
+            {'$or': [
+              {'created_by': request.user.id},
+              {'group_admin': request.user.id},
+              {'author_set': request.user.id},
+              {
+               '$and': [
+                   {'group_type': u'PUBLIC'},
+                   {'language': primary_lang_tuple},
+               ]
+              },
+            ]}
+        ]},
+        #{'member_of': gst_announced_unit_id }
+      ]})
 
-        #   module_detail_query.update({'$or': [
-        #   {'$and': [
-        #       {'member_of': {'$in': [gst_announced_unit_id, gst_ce_id]}},
-        #       {'$or': [
-        #         {'created_by': request.user.id},
-        #         {'group_admin': request.user.id},
-        #         {'author_set': request.user.id},
-        #         {
-        #          '$and': [
-        #              {'group_type': u'PUBLIC'},
-        #              {'language': primary_lang_tuple},
-        #          ]
-        #         },
-        #       ]}
-        #   ]},
-        #   #{'member_of': gst_announced_unit_id }
-        # ]})
-        #
-        # # above can be delete after robust testing of following new query:
-
-        module_detail_query.update({
-            'status': 'PUBLISHED',
-            '$or': [
-                {'group_admin': request.user.id},
-                {'created_by': request.user.id},
-                {'author_set': request.user.id},
-                {'member_of': gst_announced_unit_id},
-                {'language': primary_lang_tuple, 'group_type': u'PUBLIC', 'member_of': gst_ce_id}
-            ]
-        })
     
     if title == "drafts":
         module_detail_query.update({'$or': [
@@ -206,21 +195,22 @@ def module_detail(request, group_id, node_id,title=""):
         module_detail_query.update({'member_of': gst_announced_unit_id})
     '''
     units_under_module = node_collection.find(module_detail_query).sort('last_update', -1)
+
+    print "units under module",units_under_module.count()
+
     context_variable.update({'units_under_module': units_under_module})
 
     units_sort_list = get_attribute_value(node_id, 'items_sort_list')
-    from django.core.cache import cache
-    test = cache.get('5945db6e2c4796014abd1784attribute_valueitems_sort_list')
-    print "test:",test 
+
+    print "units sort module",units_sort_list
+
     if units_sort_list:
-        #print "from attribute:",units_sort_list
         context_variable.update({'units_sort_list': units_sort_list})
     else:
-        print "no items_sort_list"
         context_variable.update({'units_sort_list': list(units_under_module)})
-
+    print units_sort_list
     template = 'ndf/module_detail.html'
-    print "units of selected module", units_sort_list
+
     return render_to_response(
         template,
         context_variable,
@@ -230,7 +220,6 @@ def module_detail(request, group_id, node_id,title=""):
 def unit_order_list(request, group_id, node_id):
     response_dict = {"success": False}
     unit_id_list = request.POST.get('unit_list', [])
-    print "untlst:",unit_id_list
     try:
         items_sort_list_gattr_node = triple_collection.one({'_type': 'GAttribute', 'subject': ObjectId(node_id),
             'attribute_type': at_items_sort_list._id, 'status': u'PUBLISHED'})

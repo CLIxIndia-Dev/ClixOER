@@ -16,6 +16,13 @@ from gnowsys_ndf.ndf.models import GSystem, Author
 from gnowsys_ndf.ndf.views.methods import get_language_tuple, get_group_name_id
 from gnowsys_ndf.ndf.views.tasks import convertVideo
 
+from gnowsys_ndf.settings import GSTUDIO_ELASTICSEARCH
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search,connections,Q
+import json
+client = Elasticsearch('banta_i:9200')
+
+
 try:
     from bson import ObjectId
 except ImportError:  # old pymongo
@@ -32,17 +39,21 @@ def upload_form(request, group_id):
 
 
 def write_files(request, group_id, make_collection=False, unique_gs_per_file=True, **kwargs):
-	print "in write files"
+
 	user_id = request.user.id
 	try:
 		user_id = Author.extract_userid(request, **kwargs)
 	except Exception as e:
 		pass
-	print "user_id: ", user_id
+	# print "user_id: ", user_id
 
 	# author_obj = node_collection.one({'_type': u'Author', 'created_by': int(user_id)})
 	author_obj = Author.get_author_obj_from_name_or_id(user_id)
-	author_obj_id = author_obj._id
+	#print author_obj,"11111111111111111111111111"
+	if GSTUDIO_ELASTICSEARCH:
+		author_obj_id = author_obj.id
+	else:
+		author_obj_id = author_obj._id	
 	kwargs['created_by'] = user_id
 
 	group_name, group_id = get_group_name_id(group_id)
@@ -51,7 +62,7 @@ def write_files(request, group_id, make_collection=False, unique_gs_per_file=Tru
 	collection_set = []
 	uploaded_files = request.FILES.getlist('filehive', [])
 	name           = request.POST.get('name')
-	print "uploaded files:",uploaded_files
+
 	gs_obj_list    = []
 	for each_file in uploaded_files:
 
@@ -75,22 +86,40 @@ def write_files(request, group_id, make_collection=False, unique_gs_per_file=Tru
 									unique_gs_per_file=unique_gs_per_file,
 									**kwargs)
 		# print "existing_file_gs",existing_file_gs
-		if (gs_obj.get('_id', None) or existing_file_gs.get('_id', None)) and \
-		   (existing_file_gs.get('_id', None) == gs_obj.get('_id', None)):
-			if gst_file_id not in gs_obj.member_of:
-				gs_obj.member_of.append(gst_file_id)
+		if GSTUDIO_ELASTICSEARCH:
+			if (gs_obj.get('id', None) or existing_file_gs.get('id', None)) and \
+		   	   (existing_file_gs.get('id', None) == gs_obj.get('id', None)):
+		   	   	if gst_file_id not in gs_obj.member_of:
+					gs_obj.member_of.append(gst_file_id)
 
-			gs_obj.save(groupid=group_id,validate=False)
+				gs_obj.save(groupid=str(group_id),validate=False)
 
-			if 'video' in gs_obj.if_file.mime_type:
-				convertVideo.delay(user_id, str(gs_obj._id), file_name)
-			if not first_obj:
-				first_obj = gs_obj
-			else:
-				collection_set.append(gs_obj._id)
+				if 'video' in gs_obj.if_file.mime_type:
+					convertVideo.delay(user_id, str(gs_obj.id), file_name)
+				if not first_obj:
+					first_obj = gs_obj
+				else:
+					collection_set.append(gs_obj.id)
+				gs_obj_list.append(gs_obj)
+			elif existing_file_gs:
+				gs_obj_list.append(existing_file_gs)
 
-			gs_obj_list.append(gs_obj)
-		elif existing_file_gs:
+		else:
+			if (gs_obj.get('_id', None) or existing_file_gs.get('_id', None)) and \
+		   	   (existing_file_gs.get('_id', None) == gs_obj.get('_id', None)):
+		   	   	if gst_file_id not in gs_obj.member_of:
+					gs_obj.member_of.append(gst_file_id)
+
+				gs_obj.save(groupid=group_id,validate=False)
+
+				if 'video' in gs_obj.if_file.mime_type:
+					convertVideo.delay(user_id, str(gs_obj._id), file_name)
+				if not first_obj:
+					first_obj = gs_obj
+				else:
+					collection_set.append(gs_obj._id)
+				gs_obj_list.append(gs_obj)
+			elif existing_file_gs:
 				gs_obj_list.append(existing_file_gs)
 
 	if make_collection and collection_set:

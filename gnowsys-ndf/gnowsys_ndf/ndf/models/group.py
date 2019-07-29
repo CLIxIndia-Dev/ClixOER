@@ -2,6 +2,12 @@ from base_imports import *
 from node import *
 from gsystem import *
 
+from gnowsys_ndf.settings import GSTUDIO_ELASTICSEARCH
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search,connections,Q
+import json
+client = Elasticsearch('banta_i:9200')
+
 @connection.register
 class Group(GSystem):
     """Group class to create collection (group) of members
@@ -15,8 +21,8 @@ class Group(GSystem):
         'disclosure_policy': basestring,     # Members of this group - disclosed or not
         'encryption_policy': basestring,     # Encryption - yes or no
         'agency_type': basestring,           # A choice field such as Pratner,Govt.Agency, NGO etc.
-        'group_admin': [int],		         # ObjectId of Author class
-        'moderation_level': int,             # range from 0 till any integer level
+        'group_admin': [int],		     # ObjectId of Author class
+        'moderation_level': int,              # range from 0 till any integer level
         'project_config': dict
     }
 
@@ -86,14 +92,29 @@ class Group(GSystem):
 
         # case-1: argument - "group_name_or_id" is ObjectId
         if ObjectId.is_valid(group_name_or_id):
-
-            group_obj = node_collection.one({"_id": ObjectId(group_name_or_id),
-                "_type": {"$in": ["Group", "Author"]}})
+            if GSTUDIO_ELASTICSEARCH:
+                print "essssssssssssssssssssss 96 models/group.py"
+                group_name_or_id = str(group_name_or_id)
+                q1 = Q("match",id=group_name_or_id)
+                q2 = Q("match", type = "Group")|Q("match", type = "Author")
+                q3 = q2&q1
+                s = Search(index = 'nodes').using(client).query(q3)
+                res = s.execute()
+                for hit in res:
+                    group_obj = hit
+                    print group_obj
+            else:
+                print "mdddddddddddddddddddd 106 models/group.py"
+                group_obj = node_collection.one({"_id": ObjectId(group_name_or_id),
+                    "_type": {"$in": ["Group", "Author"]}})
 
             # checking if group_obj is valid
             if group_obj:
                 # if (group_name_or_id == group_obj._id):
-                group_id = ObjectId(group_name_or_id)
+                if GSTUDIO_ELASTICSEARCH:
+                    group_id = group_name_or_id
+                else:
+                    group_id = ObjectId(group_name_or_id)
                 group_name = group_obj.name
 
                 if get_obj:
@@ -107,14 +128,28 @@ class Group(GSystem):
 
         # case-2: argument - "group_name_or_id" is group name
         else:
-            group_obj = node_collection.one(
-                {"_type": {"$in": ["Group", "Author"]}, "name": unicode(group_name_or_id)})
+            if GSTUDIO_ELASTICSEARCH:
+                print "essssssssssssssssssssss 131 models/group.py"
+                q1 = Q("match", name=group_name_or_id)
+                q2 = Q("match", type = "Group")|Q("match", type = "Author")
+                q3 = q2&q1
+                s = Search(index = 'nodes').using(client).query(q3)
+                res = s.execute()
+                for hit in res:
+                    group_obj = hit
+            else:
+                print "mdddddddddddddddddddd 139 models/group.py"
+                group_obj = node_collection.one({"name": unicode(group_name_or_id),
+                    "_type": {"$in": ["Group", "Author"]}})
 
             # checking if group_obj is valid
             if group_obj:
                 # if (group_name_or_id == group_obj.name):
                 group_name = group_name_or_id
-                group_id = group_obj._id
+                if GSTUDIO_ELASTICSEARCH:
+                    group_id = group_obj.id
+                else:
+                    group_id = group_obj._id 
 
                 if get_obj:
                     return group_obj
@@ -150,12 +185,10 @@ class Group(GSystem):
         """
 
         if (user.is_superuser) or (user.id == self.created_by) or (user.id in self.group_admin):
-            print "superuser:"
             return True
         else:
             auth_obj = node_collection.one({'_type': 'Author', 'created_by': user.id})
             if auth_obj and auth_obj.agency_type == 'Teacher':
-                print "with auth_obj"
                 return True
         return False
 

@@ -18,6 +18,10 @@ from django.contrib.auth.models import User
 from django.views.generic import View
 from django.core.cache import cache
 
+from gnowsys_ndf.settings import GSTUDIO_ELASTICSEARCH
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search,connections,Q
+client = Elasticsearch('banta_i:9200')
 try:
     from bson import ObjectId
 except ImportError:  # old pymongo
@@ -37,10 +41,12 @@ from gnowsys_ndf.ndf.views.ajax_views import *
 from gnowsys_ndf.ndf.templatetags.ndf_tags import get_all_user_groups, get_sg_member_of, get_relation_value, get_attribute_value, check_is_gstaff # get_existing_groups
 # from gnowsys_ndf.ndf.org2any import org2html
 from gnowsys_ndf.ndf.views.moderation import *
-from gnowsys_ndf.ndf.views.translation import get_group_content
 # from gnowsys_ndf.ndf.views.moderation import moderation_status, get_moderator_group_set, create_moderator_task
 # ######################################################################################################################################
-
+from gnowsys_ndf.settings import GSTUDIO_ELASTICSEARCH
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search,connections,Q
+import json
 group_gst = node_collection.one({'_type': 'GSystemType', 'name': u'Group'})
 gst_group = group_gst
 app = gst_group
@@ -107,7 +113,7 @@ class CreateGroup(object):
         '''
         # getting the data into variables
         name = group_name
-        print "inside get_group_fields:",name,kwargs
+
         # to check if existing group is getting edited
         node_id = kwargs.get('node_id', None)
 
@@ -653,15 +659,13 @@ class CreateModeratedGroup(CreateSubGroup):
         # retrieves node_id. means it's edit operation of existing group.
         node_id = kwargs.get('node_id', None)
         # print "\n\n top_mod_groups_parent",top_mod_groups_parent
-        print "create_edit_moderated_group :", node_id
-        print "values:", top_mod_groups_parent,perform_checks
+
         # checking if group exists with same name
         if not self.is_group_exists(group_name) or node_id:
 
             # values will be taken from POST form fields
             group_obj = self.get_group_fields(group_name, node_id=node_id)
             group_obj.save()
-            print "Group node:", group_obj
             if perform_checks:
                 try:
                     if top_mod_groups_parent:
@@ -1436,7 +1440,6 @@ class GroupCreateEditHandler(View):
         Catering GET request of group's create/edit.
         Render's to create_group template.
         """
-        print "Entered into get method of GroupCreateEditHandler"
         try:
             group_id = ObjectId(group_id)
         except:
@@ -1449,11 +1452,11 @@ class GroupCreateEditHandler(View):
         node_edit_flag = request.GET.get('node_edit',False)
         if not isinstance(node_edit_flag, bool):
             node_edit_flag = eval(node_edit_flag)
-        
+        # print "\n node_edit_flag ==== ",type(node_edit_flag)
         partnergroup_flag = request.GET.get('partnergroup','')
         if partnergroup_flag:
             partnergroup_flag = eval(partnergroup_flag)
-        print "\n node_edit_flag ==== ",type(node_edit_flag), subgroup_flag, partnergroup_flag
+
         if action == "edit":  # to edit existing group
 
             group_obj = get_group_name_id(group_id, get_obj=True)
@@ -1558,7 +1561,6 @@ class GroupCreateEditHandler(View):
             mod_group = CreateModeratedGroup(request)
 
             # calling method to create new group
-            print "values passed into create_edit_moderated_group:", group_name,moderation_level,parent_group_id
             result = mod_group.create_edit_moderated_group(group_name, moderation_level, "ModeratingGroup", top_mod_groups_parent=parent_group_id, node_id=node_id)
 
             # print "=== result: ", result
@@ -1621,15 +1623,11 @@ class EventGroupCreateEditHandler(View):
         Catering GET request of group's create/edit.
         Render's to create_group template.
         """
-
-        print "inside get of EventGroupCreateEditHandler"
-        #import ipdb; ipdb.set_trace()
         try:
             group_id = ObjectId(group_id)
         except:
             group_name, group_id = get_group_name_id(group_id)
         # course_node_id = request.GET.get('cnode_id', '')
-
         group_obj = None
         nodes_list = []
         spl_group_type = sg_type
@@ -1637,10 +1635,8 @@ class EventGroupCreateEditHandler(View):
         gst_module_name, gst_module_id = GSystemType.get_gst_name_id('Module')
         modules = GSystem.query_list('home', 'Module', request.user.id)
         # spl_group_type = request.GET.get('sg_type','')
-        #print "\n\n spl_group_type", spl_group_type
+        # print "\n\n spl_group_type", spl_group_type
         title = action + ' ' + spl_group_type
-        print "values :",group_id,modules,spl_group_type
-
         context_variables = {
             'title': title, 'modules': modules,
             'spl_group_type': spl_group_type,
@@ -1682,7 +1678,7 @@ class EventGroupCreateEditHandler(View):
 
             # making list of group names (to check uniqueness of the group):
             nodes_list = [str(g_obj.name.strip().lower()) for g_obj in available_nodes]
-            print "node list :", nodes_list
+
             context_variables.update({'nodes_list': nodes_list})
 
         # In the case of need, we can simply replace:
@@ -1698,7 +1694,6 @@ class EventGroupCreateEditHandler(View):
         To handle post request of group form.
         To save edited or newly-created group's data.
         '''
-        print "inside post of EventGroupCreateEditHandler"
         parent_group_obj = get_group_name_id(group_id, get_obj=True)
 
         # getting field values from form:
@@ -1708,8 +1703,7 @@ class EventGroupCreateEditHandler(View):
         # course_node_id = request.POST.get('course_node_id', '')
         # check if group's editing policy is already 'EDITABLE_MODERATED' or
         # it was not and now it's changed to 'EDITABLE_MODERATED' or vice-versa.
-        #import ipdb; ipdb.set_trace()
-        print "values :",group_name,node_id,edit_policy
+        # import ipdb; ipdb.set_trace()
         if (edit_policy == "EDITABLE_MODERATED") or (parent_group_obj.edit_policy == "EDITABLE_MODERATED"):
 
             moderation_level = request.POST.get('moderation_level', '')
@@ -1893,7 +1887,7 @@ def group(request, group_id, app_id=None, agency_type=None):
       # Without Log-In View
       cur_public = node_collection.find({'_type': "Group",
                                        '_id': {'$nin': [ObjectId(group_id)]},
-                                       '$and': [    ],
+                                       '$and': [query_dict],
                                        '$or': [
                                           {'name': {'$regex': search_field, '$options': 'i'}},
                                           {'tags': {'$regex':search_field, '$options': 'i'}}
@@ -1921,7 +1915,6 @@ def group(request, group_id, app_id=None, agency_type=None):
 
     if auth:
       # Logged-In View
-      print "in group.py on logging in before query :",query_dict
       cur_groups_user = node_collection.find({'_type': "Group",
                                               '$and': [query_dict],
                                               '_id': {'$nin': [ObjectId(group_id), auth._id]},
@@ -1943,12 +1936,11 @@ def group(request, group_id, app_id=None, agency_type=None):
 
     else:
       # Without Log-In View
-      "Before query in group.py"
       cur_public = node_collection.find({'_type': "Group",
                                          '_id': {'$nin': [ObjectId(group_id)]},
                                          '$and': [query_dict],
                                          'name': {'$nin': ["home"]},
-                                         'group_type': {'$in':["PUBLIC",None]}
+                                         'group_type': "PUBLIC"
                                      }).sort('last_update', -1)
 
       # if cur_public.count():
@@ -2828,18 +2820,29 @@ def create_sub_group(request,group_id):
 @login_required
 @get_execution_time
 def upload_using_save_file(request,group_id):
+    print "IN THE FUNCTION            "
+    print group_id,"ddddddddddddddddddddd"
     from gnowsys_ndf.ndf.views.file import save_file
     try:
         group_id = ObjectId(group_id)
     except:
         group_name, group_id = get_group_name_id(group_id)
-
-    group_obj = node_collection.one({'_id': ObjectId(group_id)})
+    if GSTUDIO_ELASTICSEARCH:
+        group_id = str(group_id)
+        q = Q("match", id = group_id)
+        s = Search(index ='nodes').using(client).query(q)
+        res = s.execute()
+        for hit in res:
+            group_obj = hit
+    else:
+        group_obj = node_collection.one({'_id': ObjectId(group_id)})
     title = request.POST.get('context_name','')
+    #print "111111111111111",title
     sel_topic = request.POST.get('topic_list','')
-    
+    print "title:",title
     usrid = request.user.id
     name  = request.POST.get('name')
+    # print "55555555555555555555",name
     # print "\n\n\nusrid",usrid
     # # url_name = "/"+str(group_id)
     # for key,value in request.FILES.items():
@@ -2857,17 +2860,34 @@ def upload_using_save_file(request,group_id):
     #     #     url_name = "/"+str(group_id)+"/#gallery-tab"
 
     from gnowsys_ndf.ndf.views.filehive import write_files
-    is_user_gstaff = check_is_gstaff(group_obj._id, request.user)
+    if GSTUDIO_ELASTICSEARCH:
+        is_user_gstaff = check_is_gstaff(group_obj.id, request.user)
+    else:
+        is_user_gstaff = check_is_gstaff(group_obj._id, request.user)
     content_org = request.POST.get('content_org', '')
     uploaded_files = request.FILES.getlist('filehive', [])
+    # print "555555555555555555",uploaded_files
     # gs_obj_list = write_files(request, group_id)
     # fileobj_list = write_files(request, group_id)
     # fileobj_id = fileobj_list[0]['_id']
     fileobj_list = write_files(request, group_id,unique_gs_per_file=False)
+    #print "555555555555555555",fileobj_list
     # fileobj_list = write_files(request, group_id)
     fileobj_id = fileobj_list[0]['_id']
-    file_node = node_collection.one({'_id': ObjectId(fileobj_id) })
-
+    if GSTUDIO_ELASTICSEARCH:
+        fileobj_id = str(fileobj_id)
+        print fileobj_id
+        q = Q("match",id = fileobj_id)
+        s = Search(index = 'nodes').using(client).query(q)
+        res = s.execute()
+        for hit in res:
+            file_node = hit
+    else:
+        file_node = node_collection.one({'_id': ObjectId(fileobj_id) })
+    print
+    print file_node,"//////////////////////////////////////////"
+    print 
+    print
     # if GSTUDIO_FILE_UPLOAD_FORM == 'detail' and GSTUDIO_SITE_NAME == "NROER" and title != "raw material" and title != "gallery":
     if GSTUDIO_FILE_UPLOAD_FORM == 'detail' and title != "raw material" and title != "gallery":
         if request.POST:
@@ -2884,6 +2904,9 @@ def upload_using_save_file(request,group_id):
             copyright = request.POST.get("Copyright", "")
             source = request.POST.get("Source", "")
             Audience = request.POST.getlist("audience", "")
+            print 
+            print 
+            print "AUEIENCE",Audience,"+++++++++++++++++++++++++++++++++++++++++++  "
             fileType = request.POST.get("FileType", "")
             Based_url = request.POST.get("based_url", "")
             co_contributors = request.POST.get("co_contributors", "")
@@ -2915,37 +2938,85 @@ def upload_using_save_file(request,group_id):
 
             file_node.modified_by = int(usrid)
             if source:
-                # create gattribute for file with source value
-                source_AT = node_collection.one({'_type':'AttributeType','name':'source'})
+                # create gattribute for file with source value 
+                if GSTUDIO_ELASTICSEARCH:
+                    q = Q("match", type = 'AttributeType') & Q("match", name = 'source')
+                    s = Search(index = 'nodes').using(client).querry(q)
+                    res = s.execute()
+                    source_AT = res
+                else:
+                    source_AT = node_collection.one({'_type':'AttributeType','name':'source'})
                 src = create_gattribute(ObjectId(file_node._id), source_AT, source)
 
             if Audience:
               # create gattribute for file with Audience value
-                audience_AT = node_collection.one({'_type':'AttributeType','name':'audience'})
+                if GSTUDIO_ELASTICSEARCH:
+                    q = Q("match", type = 'AttributeType') & Q("match", name = 'audience')
+                    s = Search(index = 'nodes').using(client).querry(q)
+                    res = s.execute()
+                    audience_AT = res
+                else:
+                    audience_AT = node_collection.one({'_type':'AttributeType','name':'audience'})
+                #audience_AT = node_collection.one({'_type':'AttributeType','name':'audience'})
                 aud = create_gattribute(file_node._id, audience_AT, Audience)
 
             if fileType:
               # create gattribute for file with 'educationaluse' value
-                educationaluse_AT = node_collection.one({'_type':'AttributeType', 'name': 'educationaluse'})
+                if GSTUDIO_ELASTICSEARCH:
+                    q = Q("match", type = 'AttributeType') & Q("match", name = 'educationaluse')
+                    s = Search(index = 'nodes').using(client).querry(q)
+                    res = s.execute()
+                    educationaluse_AT = res
+                else:
+                    educationaluse_AT = node_collection.one({'_type':'AttributeType','name':'educationaluse'})
+                #educationaluse_AT = node_collection.one({'_type':'AttributeType', 'name': 'educationaluse'})
                 FType = create_gattribute(file_node._id, educationaluse_AT, fileType)
 
             if subject:
                 # create gattribute for file with 'educationaluse' value
-                subject_AT = node_collection.one({'_type':'AttributeType', 'name': 'educationalsubject'})
+                if GSTUDIO_ELASTICSEARCH:
+                    q = Q("match", type = 'AttributeType') & Q("match", name = 'educationalsubject')
+                    s = Search(index = 'nodes').using(client).querry(q)
+                    res = s.execute()
+                    subject_AT = res
+                else:
+                    subject_AT = node_collection.one({'_type':'AttributeType','name':'educationalsubject'})
+                #subject_AT = node_collection.one({'_type':'AttributeType', 'name': 'educationalsubject'})
                 sub = create_gattribute(file_node._id, subject_AT, subject)
 
             if level:
               # create gattribute for file with 'educationaluse' value
-                educationallevel_AT = node_collection.one({'_type':'AttributeType', 'name': 'educationallevel'})
+                if GSTUDIO_ELASTICSEARCH:
+                    q = Q("match", type = 'AttributeType') & Q("match", name = 'educationallevel')
+                    s = Search(index = 'nodes').using(client).querry(q)
+                    res = s.execute()
+                    educationallevel_AT = res
+                else:
+                    educationallevel_AT = node_collection.one({'_type':'AttributeType','name':'educationallevel'})
+                #educationallevel_AT = node_collection.one({'_type':'AttributeType', 'name': 'educationallevel'})
                 edu_level = create_gattribute(file_node._id, educationallevel_AT, level)
             if Based_url:
               # create gattribute for file with 'educationaluse' value
-                basedonurl_AT = node_collection.one({'_type':'AttributeType', 'name': 'basedonurl'})
+                if GSTUDIO_ELASTICSEARCH:
+                    q = Q("match", type = 'AttributeType') & Q("match", name = 'basedonurl')
+                    s = Search(index = 'nodes').using(client).querry(q)
+                    res = s.execute()
+                    basedonurl_AT = res
+                else:
+                    basedonurl_AT = node_collection.one({'_type':'AttributeType','name':'basedonurl'})
+                #basedonurl_AT = node_collection.one({'_type':'AttributeType', 'name': 'basedonurl'})
                 basedUrl = create_gattribute(file_node._id, basedonurl_AT, Based_url)
 
             if co_contributors:
               # create gattribute for file with 'co_contributors' value
-                co_contributors_AT = node_collection.one({'_type':'AttributeType', 'name': 'co_contributors'})
+                if GSTUDIO_ELASTICSEARCH:
+                    q = Q("match", type = 'AttributeType') & Q("match", name = 'co_contributors')
+                    s = Search(index = 'nodes').using(client).querry(q)
+                    res = s.execute()
+                    co_contributors_AT = res
+                else:
+                    co_contributors_AT = node_collection.one({'_type':'AttributeType','name':'co_contributors'})
+                #co_contributors_AT = node_collection.one({'_type':'AttributeType', 'name': 'co_contributors'})
                 co_contributors = create_gattribute(file_node._id, co_contributors_AT, co_contributors)
             if content_org:
                     file_node.content_org = unicode(content_org)
@@ -2964,7 +3035,14 @@ def upload_using_save_file(request,group_id):
             # # print "++++++++++++++++++++++++++++++++++++++++",asset_node._id
             # asset_content_node = create_assetcontent(ObjectId('58a3dd4cc6bd690400016ae5'),file_node.name,group_id,file_node.created_by)
             # print "---------------------------------------",asset_content_node
-            rt_teaches = node_collection.one({'_type': "RelationType", 'name': unicode("teaches")})
+            if GSTUDIO_ELASTICSEARCH:
+                q = Q("match", type = 'RelationType') & Q("match", name = 'teaches')
+                s = Search(index = 'nodes').using(client).querry(q)
+                res = s.execute()
+                rt_teaches = res
+            else:
+                rt_teaches = node_collection.one({'_type':'AttributeType','name':'co_contributors'})
+            #rt_teaches = node_collection.one({'_type': "RelationType", 'name': unicode("teaches")})
             create_grelation(file_node._id,rt_teaches,ObjectId(sel_topic))
             file_node.save(groupid=group_id,validate=False)
 
@@ -3070,272 +3148,3 @@ def notification_details(request,group_id):
                                 },
                                 context_instance = RequestContext(request)
                             )
-@get_execution_time
-def group_detail(request, group_id, node_id,title=""):
-    '''
-    detail of of selected module
-    '''
-    print "inside group_detail", request.LANGUAGE_CODE
-    gst_module_name, gst_module_id = GSystemType.get_gst_name_id('Module')
-    hmgroup_name, hmgroup_id = Group.get_group_name_id(group_id)
-    print "in group_detail and group id, title",hmgroup_id,title
-    print "node_id",node_id   
-    group_obj = Node.get_node_by_id(node_id)
-    group_dict = get_group_content(node_id,request.LANGUAGE_CODE)
-    print group_dict
-    context_variable = {
-                        'group_id': hmgroup_id, 'groupid': hmgroup_id,
-                        'node': group_obj,'descrp':group_dict['content'], 'title': title,
-                        'card': 'ndf/event_card.html', 'card_url_name': 'groupchange'
-                    }
-
-    # module_detail_query = {'member_of': gst_base_unit_id,
-    #           '_id': {'$nin': module_unit_ids},
-    #           'status':'PUBLISHED',
-    #             }
-    # if not gstaff_access:
-    #     module_detail_query.update({'$or': [
-    #           {'created_by': request.user.id},
-    #           {'group_admin': request.user.id},
-    #           {'author_set': request.user.id},
-    #           # No check on group-type PUBLIC for DraftUnits.
-    #           # {'group_type': 'PUBLIC'}
-    #           ]})
-
-
-
-    gstaff_access = check_is_gstaff(node_id,request.user)
-
-    group_detail_query = {'_id': {'$in': group_obj.collection_set},
-    'status':'PUBLISHED'
-    }
-    
-    '''
-    if not gstaff_access:
-        module_detail_query.update({'$or': [
-        {'$and': [
-            {'member_of': gst_base_unit_id},
-            {'$or': [
-              {'created_by': request.user.id},
-              {'group_admin': request.user.id},
-              {'author_set': request.user.id},
-            ]}
-        ]},
-        {'member_of': gst_announced_unit_id}
-      ]})
-    '''
-    primary_lang_tuple = get_language_tuple(GSTUDIO_PRIMARY_COURSE_LANGUAGE)
-    if title == "modules" or title  == "":
-
-        #   module_detail_query.update({'$or': [
-        #   {'$and': [
-        #       {'member_of': {'$in': [gst_announced_unit_id, gst_ce_id]}},
-        #       {'$or': [
-        #         {'created_by': request.user.id},
-        #         {'group_admin': request.user.id},
-        #         {'author_set': request.user.id},
-        #         {
-        #          '$and': [
-        #              {'group_type': u'PUBLIC'},
-        #              {'language': primary_lang_tuple},
-        #          ]
-        #         },
-        #       ]}
-        #   ]},
-        #   #{'member_of': gst_announced_unit_id }
-        # ]})
-        #
-        # # above can be delete after robust testing of following new query:
-
-        group_detail_query.update({
-            'status': 'PUBLISHED',
-            '$or': [
-                {'group_admin': request.user.id},
-                {'created_by': request.user.id},
-                {'author_set': request.user.id},
-                {'member_of': gst_module_id},
-            ]
-        })
-    
-    # if title == "drafts":
-    #     group_detail_query.update({'$or': [
-    #     {'$and': [
-    #         {'member_of': gst_base_unit_id},
-    #         {'$or': [
-    #           {'created_by': request.user.id},
-    #           {'group_admin': request.user.id},
-    #           {'author_set': request.user.id},
-    #         ]}
-    #     ]},
-    #   ]}) 
-
-    # units_under_module = Node.get_nodes_by_ids_list(module_obj.collection_set)
-    '''
-    gstaff_access = check_is_gstaff(group_id, request.user)
-
-    if gstaff_access:
-        module_detail_query.update({'member_of': {'$in': [gst_announced_unit_id, gst_base_unit_id]}})
-    else:
-        module_detail_query.update({'member_of': gst_announced_unit_id})
-    '''
-    modules_under_group = node_collection.find(group_detail_query).sort('last_update', -1)
-    modules_sort_list = []    
-    context_variable.update({'modules_under_group': modules_under_group})
-
-    #modules_sort_list = get_attribute_value(node_id, 'items_sort_list')
-
-    #if modules_sort_list:
-    #    context_variable.update({'modules_sort_list': modules_sort_list})
-    #else:
-    #    print "no items_sort_list"
-    for each in modules_under_group:
-        modules_sort_list.append(each)
-    context_variable.update({'modules_sort_list': modules_sort_list})
-    context_variable.update({'title': 'courses'})
-
-    template = 'ndf/group_detail.html'
-    #template = 'ndf/index_oer.html'
-    #print "modules of selected group", modules_sort_list
-    return render_to_response(
-        template,
-        context_variable,
-        context_instance=RequestContext(request))
-
-@get_execution_time
-def group_create_edit(request, group_id, node_id,page_type=None):
-    group_obj = get_group_name_id(group_id, get_obj=True)
-    group_id = group_obj._id
-    group_name = group_obj.name
-    print "inside create_edit_group",group_id
-    #template = 'ndf/gevent_base.html'
-    template = 'ndf/oer_group_create_edit.html'
-    # templates_gst = node_collection.one({"_type":"GSystemType","name":"Template"})
-    # if templates_gst._id:
-    #   # templates_cur = node_collection.find({"member_of":ObjectId(GST_PAGE._id),"type_of":ObjectId(templates_gst._id)})
-    #   templates_cur = node_collection.find({"type_of":ObjectId(templates_gst._id)})
-
-    # context_variables = {
-    #         'group_id': group_id, 'groupid': group_id, 'group_name':group_name,'page_type':page_type,
-    #         'group_obj': group_obj, 'title': 'create_course_pages',
-    #         'activity_node': None, #'templates_cur': templates_cur,
-    #         'cancel_activity_url': reverse('course_pages',
-    #                                     kwargs={
-    #                                     'group_id': group_id
-    #                                     })}
-
-    node_obj = node_collection.one({'_id': ObjectId(node_id)})
-    context_variables = {'group_id': group_id, 'groupid': group_id, 'group_name':group_name,'page_type':page_type,
-                                'group_obj': group_obj, 'title': 'create_edit_group','node': node_obj, 
-                                'cancel_activity_url': reverse('group_detail_url',
-                                                            kwargs={
-                                                            'group_id': group_id,
-                                                            'node_id': node_obj._id
-                                                            })}
-
-
-    return render_to_response(template,
-                                context_variables,
-                                context_instance = RequestContext(request)
-    )
-
-
-@login_required
-def save_group_page(request, group_id,node_id):
-    group_obj = get_group_name_id(group_id, get_obj=True)
-    group_id = group_obj._id
-    group_name = group_obj.name
-    print "in save group page",group_id,group_name
-    # tags = request.POST.get("tags",[])
-    # if tags:
-    #     tags = json.loads(tags)
-    # else:
-    #     tags = []    
-    # #template = 'ndf/gevent_base.html'
-    # template = 'ndf/lms.html'
-    # page_gst_name, page_gst_id = GSystemType.get_gst_name_id("Page")
-    # page_obj = None
-    grp_lang =  request.POST.get("lan", '')
-    if request.method == "POST":
-        name = request.POST.get("name", "")
-        alt_name = request.POST.get("alt_name", "")
-        content = request.POST.get("content_org", None)
-        if node_id:
-            grp_obj = node_collection.one({'_id': ObjectId(node_id)})
-            if grp_obj.altnames != alt_name:
-                grp_obj.altnames = unicode(alt_name)
-        else:
-            grp_gst_id = Node.get_name_id_from_type('Group','GSystemType')[1]
-            grp_obj = node_collection.collection.Group()
-            grp_obj.fill_group_values(request=request)
-            grp_obj.member_of = [grp_gst_id]
-            grp_obj.group_set = [group_id]
-            grp_obj.altnames = unicode(alt_name)
-            
-        if grp_lang:
-             language = get_language_tuple(grp_lang)
-             grp_obj.language = language
-        # if 'admin_info_page' in request.POST:
-        #     admin_info_page = request.POST['admin_info_page']
-        #     if admin_info_page:
-        #         admin_info_page = json.loads(admin_info_page)
-        #     if "None" not in admin_info_page:
-        #         has_admin_rt = node_collection.one({'_type': "RelationType", 'name': "has_admin_page"})
-        #         admin_info_page = map(ObjectId, admin_info_page)
-        #         create_grelation(page_obj._id, has_admin_rt,admin_info_page)
-        #         page_obj.reload()
-        #     return HttpResponseRedirect(reverse("view_course_page",
-        #      kwargs={'group_id': group_id, 'page_id': page_obj._id}))
-
-        # if 'help_info_page' in request.POST:
-        #     help_info_page = request.POST['help_info_page']
-        #     if help_info_page:
-        #         help_info_page = json.loads(help_info_page)
-        #     if "None" not in help_info_page:
-        #         has_help_rt = node_collection.one({'_type': "RelationType", 'name': "has_help"})
-        #         help_info_page = map(ObjectId, help_info_page)
-        #         create_grelation(page_obj._id, has_help_rt,help_info_page)
-        #         page_obj.reload()
-        #     return HttpResponseRedirect(reverse("view_course_page",
-        #      kwargs={'group_id': group_id, 'page_id': page_obj._id}))
-        # page_obj.fill_gstystem_values(tags=tags)
-        grp_obj.name = unicode(name)
-        grp_obj.content = unicode(content)
-        grp_obj.created_by = request.user.id
-        grp_obj.save()
-        return HttpResponseRedirect(reverse("group_detail_url",
-         kwargs={'group_id': group_id, 'node_id': grp_obj._id}))
-
-@login_required
-@get_execution_time
-def inline_edit_grp(request, group_id):
-    print "inside inline_edit_grp"
-    group_obj   = get_group_name_id(group_id, get_obj=True)
-    group_id    = group_obj._id
-    group_name  = group_obj.name
-    context_variables = {
-            'group_id': group_id, 'groupid': group_id, 'group_name':group_name,
-            }
-    template = None
-    print "method", request.method
-    if request.method == "POST":
-        node_obj = node_collection.one({'_id': ObjectId(node_id)})
-        type_of_req = request.POST.get("type", "")
-        print "req info",node_id,type_of_req
-        if type_of_req == "edit":
-            print "inside edit if"
-            node_content = request.POST.get("node_content", node_obj.content)
-            template = 'ndf/html_editor.html'
-            context_variables['var_name'] = "content_org"
-            context_variables['var_value'] = node_content
-            context_variables['node_id'] = node_obj._id
-            context_variables['ckeditor_toolbar'] ="GeneralToolbar"
-            context_variables['node'] = node_obj
-        elif type_of_req == "save":
-            content_val = request.POST.get("content_val", "")
-            custom_redirect = request.POST.get("custom_redirect", "")
-            node_obj.content = content_val
-            node_obj.save()
-            template = 'ndf/group_detail.html'
-            
-    print template
-    return render_to_response(template, context_variables, context_instance = RequestContext(request))

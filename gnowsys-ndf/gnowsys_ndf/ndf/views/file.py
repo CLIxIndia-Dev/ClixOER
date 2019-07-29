@@ -16,7 +16,11 @@ import threading
 from PIL import Image, ImageDraw
 from StringIO import StringIO
 
+
 ''' -- imports from installed packages -- '''
+from gnowsys_ndf.settings import GSTUDIO_ELASTICSEARCH
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search,connections,Q
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -29,6 +33,7 @@ from django.core.files.temp import gettempdir
 from django.core.files.uploadedfile import UploadedFile # django file handler
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
+from django.utils.encoding import smart_str
 
 from mongokit import paginator
 
@@ -38,10 +43,10 @@ from gnowsys_ndf.ndf.views.notify import set_notif_val
 # from gnowsys_ndf.ndf.org2any import org2html
 # from gnowsys_ndf.ndf.models import Node, GSystemType, File, GRelation, STATUS_CHOICES, Triple, node_collection, triple_collection, gridfs_collection
 from gnowsys_ndf.ndf.models import Node, GSystemType, GRelation, STATUS_CHOICES, Triple, node_collection, triple_collection, gridfs_collection
-from gnowsys_ndf.ndf.views.methods import get_node_metadata, get_node_common_fields, create_gattribute, get_page, get_execution_time,set_all_urls,get_language_tuple  # , get_page
-from gnowsys_ndf.ndf.views.es_queries import get_group_name_id
+from gnowsys_ndf.ndf.views.methods import get_node_metadata, get_node_common_fields, create_gattribute, get_page, get_execution_time,set_all_urls,get_group_name_id, get_language_tuple  # , get_page
 from gnowsys_ndf.ndf.views.methods import node_thread_access, create_thread_for_node, create_grelation, delete_grelation
 from gnowsys_ndf.ndf.templatetags.ndf_tags import get_relation_value
+client = Elasticsearch('banta_i:9200')
 
 try:
     from bson import ObjectId
@@ -751,24 +756,25 @@ def paged_file_objs(request, group_id, filetype, page_no):
             context_instance = RequestContext(request))
 
 
-# @login_required
+@login_required
 @get_execution_time
 def uploadDoc(request, group_id):
-    print "inside"
+    print "in uploadDoc",group_id
     try:
         group_id = ObjectId(group_id)
     except:
         group_name, group_id = get_group_name_id(group_id)
 
-    print "inside upload doc",group_name,group_id
-    
     if request.method == "GET":
         topic_gst = node_collection.one({'_type': 'GSystemType', 'name': 'Topic'})
         topic_nodes = node_collection.find({'member_of': {'$in': [topic_gst._id]}})
         program_res = request.GET.get("program_res", "")
         if program_res:
           program_res = eval(program_res)
+        print "000000000000",program_res
+        print "9999999999999999999"
         page_url = request.GET.get("next", "")
+        print "11111111",page_url
         # template = "ndf/UploadDoc.html"
 
         template = "ndf/UploadDoc.html"
@@ -780,6 +786,7 @@ def uploadDoc(request, group_id):
         variable = RequestContext(request, {'page_url': page_url,'groupid':group_id,'group_id':group_id, 'program_res':program_res,'topic_nodes':topic_nodes})
     else:
         variable = RequestContext(request, {'groupid':group_id,'group_id':group_id,'program_res':program_res,'topic_nodes':topic_nodes})
+    print "before render:",template
     return render_to_response(template, variable)
 
 
@@ -790,7 +797,7 @@ def submitDoc(request, group_id):
     """
     submit files for saving into gridfs and creating object
     """
-
+    print "submitDoc"
     try:
         group_id = ObjectId(group_id)
     except:
@@ -1029,7 +1036,7 @@ def save_file(files,title, userid, group_id, content_org, tags, img_type=None, l
     else:
         try:
             files.seek(0)
-            filetype = magic.from_buffer(files.read(1024), mime='true')  # Gusing filetype by python-magic
+            filetype = magic.from_buffer(files.read(100000), mime='true')  # Gusing filetype by python-magic
             # print "\nfiletype : ", filetype, "\n"
             filetype1 = mimetypes.guess_type(files.name)[0]
             if filetype1:
@@ -1671,6 +1678,7 @@ def getFileThumbnail(request, group_id, _id):
 
 @get_execution_time
 def readDoc(request, _id, group_id, file_name=""):
+    print "-----------------------------READ DOC--------------------------"
     '''Return Files
     '''
     # ins_objectid  = ObjectId()
@@ -1690,19 +1698,59 @@ def readDoc(request, _id, group_id, file_name=""):
     except:
         group_name, group_id = get_group_name_id(group_id)
 
+    if GSTUDIO_ELASTICSEARCH:
+      print "ESSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS"
+      q = Q("match", id = _id)
+      print _id,"   ffffffffffffffffffffffff"
+      print "1111111111111"
+      s = Search(index ='nodes').using(client).query(q)
+      print "2222222222222"
+      print s.count()
+      res = s.execute()
+      #res.count()
+      print "3333333333333"
+      for hit in res:
+        print "44444444444"
+        file_node = hit
 
-    file_node = node_collection.one({"_id": ObjectId(_id)})
+    else:
+      print "mddddddddddddddddddddddddddddddddddddddddddddd"
+      file_node = node_collection.one({"_id": ObjectId(_id)})
 
 
     if file_node is not None:
 
         if hasattr(file_node, 'if_file') and file_node.if_file.original.relurl:
-            # print "md5_or_relurl : ", file_node.if_file.original
-            return HttpResponse(file_node.get_file(file_node.if_file.original.relurl),
-                                content_type=file_node.if_file.mime_type)
+            file1 = file_node.if_file.original.relurl
+            #print file1,"_________________________________________-"
+            path = '/data/media/'+file1
+            #with open(path,'rb') as file2:
+            #print "1111111111111111"
+            file = open(path,"rb")
+            response = HttpResponse(file,content_type=file_node.if_file.mime_type)
+            #print "2222222222222222"
+                #print response['Content-Disposition']
+            filename = file_node.name
+            response['X-Accel-Redirect'] = '/protected/' + path
+            #response['Content-Disposition'] = 'attachment; filename=%s' % smart_str(file2)\
+            response['Content-Disposition'] = 'attachment;filename=' + filename
+            '''print "00000000000000000000000000000000"
+            print response['Content-Disposition']
+            print "3333333333333333"
+            #print response['X-Sendfile']'''
+            response['X-Sendfile'] = smart_str(path)
+            '''print "000000000000000000000000000000000"
+            print response['X-Sendfile']
+            print "4444444444444444"
+            print "5555555555555555"
+            #print response '''
+            return response
 
         elif file_node.fs_file_ids:
+            print file_node.fs_file_ids
             if file_node.mime_type == 'video':
+                print file_node.fs_file_ids
+                print "============================="
                 if len(file_node.fs_file_ids) > 2:
                     if (file_node.fs.files.exists(file_node.fs_file_ids[2])):
                         f = file_node.fs.files.get(ObjectId(file_node.fs_file_ids[2]))

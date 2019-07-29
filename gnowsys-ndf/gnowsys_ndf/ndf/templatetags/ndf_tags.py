@@ -55,11 +55,15 @@ from django.contrib.sites.models import Site
 
 # from gnowsys_ndf.settings import LANGUAGES
 # from gnowsys_ndf.settings import GSTUDIO_GROUP_AGENCY_TYPES,GSTUDIO_AUTHOR_AGENCY_TYPES
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search, connections, Q
+from gnowsys_ndf.settings import GSTUDIO_ELASTICSEARCH
+client = Elasticsearch('banta_i:9200')
 
 from gnowsys_ndf.ndf.node_metadata_details import schema_dict
 from django_mailbox.models import Mailbox
 import itertools
-
+#GSTUDIO_ELASTICSEARCH = True
 register = Library()
 at_apps_list = node_collection.one({
     "_type": "AttributeType", "name": "apps_list"
@@ -135,7 +139,7 @@ def get_site_variables():
 	site_var['INSTITUTE_ID'] = GSTUDIO_INSTITUTE_ID
 	site_var['HEADER_LANGUAGES'] = HEADER_LANGUAGES
 	site_var['GSTUDIO_DOC_FOOTER_TEXT'] = GSTUDIO_DOC_FOOTER_TEXT
-	site_var['GSTUDIO_OER_GROUPS'] = GSTUDIO_OER_GROUPS
+
 	cache.set('site_var', site_var, 60 * 30)
 
 	return  site_var
@@ -235,15 +239,7 @@ def get_node(node_id):
 def get_schema(node):
 	if node:
 		# obj = node_collection.find_one({"_id": ObjectId(node.member_of[0])}, {"name": 1})
-		print "type of node in get_schema",type(node)
-		from elasticsearch_dsl import * 
-		if isinstance(node,response.hit.Hit):
-			q = Q('match',id = node.member_of[0])
-			s1 = Search(using=es, index='nodes',doc_type="node").query(q)
-			s2 = s1.execute()
-			nam =s2[0]
-		else:
-			nam = node.member_of_names_list[0]
+		nam = node.member_of_names_list[0]
 		if(nam == 'Page'):
 			return [1,schema_dict[nam]]
 
@@ -332,7 +328,7 @@ def get_node_ratings(request,node_id):
 		counter_var = 0
 		avg_rating = 0.0
 		rating_data = {}
-		for each in node_obj:
+		for each in node_obj.rating:
 			if each['user_id'] == user.id:
 				rating_by_user = each['score']
 			if each['user_id'] == 0:
@@ -389,7 +385,7 @@ def get_group_gapps(group_id=None):
 
 		# gapps_list = group_attrs.get('apps_list', [])
 		at_apps_list = node_collection.one({'_type': 'AttributeType', 'name': 'apps_list'})
-		# attr_list = triple_collection.find({'_type': 'GAttribute', 'attribute_type': at_apps_list._id, 'subject':group_obj._id})
+		# attr_list = triple_collection.frequestind({'_type': 'GAttribute', 'attribute_type': at_apps_list._id, 'subject':group_obj._id})
 		# attr_list = triple_collection.one({
 		# 									'_type': 'GAttribute',
 		# 									'attribute_type': at_apps_list._id,
@@ -508,15 +504,6 @@ def get_group_object(group_id = None):
 
 @get_execution_time
 @register.assignment_tag
-def get_oer_groups():
-   print "inside get_oer_groups"
-   gst_group = node_collection.one({'_type': "GSystemType", 'name': "Group"})
-   oergroups_cur = node_collection.find({'member_of':gst_group._id, 'name':{'$in':GSTUDIO_OER_GROUPS}}) .sort('last_update',-1)
-   print "oer_groups_list", oergroups_cur.count()
-   return list(oergroups_cur)  
-
-@get_execution_time
-@register.assignment_tag
 def get_states_object(request):
    group_object = node_collection.one({'$and':[{'_type':u'Group'},{'name':u'State Partners'}]})
    return group_object
@@ -593,7 +580,6 @@ def get_metadata_values(metadata_type=None):
 		return metadata[metadata_type]
 	return metadata
 
-
 @get_execution_time
 @register.assignment_tag
 def get_attribute_value(node_id, attr_name, get_data_type=False, use_cache=True):
@@ -601,21 +587,54 @@ def get_attribute_value(node_id, attr_name, get_data_type=False, use_cache=True)
     cache_result = cache.get(cache_key)
 
     if (cache_key in cache) and not get_data_type and use_cache:
-    	#print "from cache in module detail:", cache_result
         return cache_result
 
     attr_val = ""
     node_attr = data_type = None
     if node_id:
+    	if GSTUDIO_ELASTICSEARCH:
+    		#print "esssssssssssssssssssssssssssssssssssssssssssss"
+    		s = Search(index='nodes').using(client).query("match", type='AttributeType').query("match", name=unicode(attr_name))
+    		res=s.execute()
+    		for hit in res:
+    			gattr = hit
+
+        else:
+        	#print "mongoooooooooooooooooooooooooooooooooooooooooo"
+        	gattr = node_collection.one({'_type': 'AttributeType', 'name': unicode(attr_name)})	
+
+
+		if get_data_type:
+			data_type = gattr.data_type 
+		if gattr:
+			if GSTUDIO_ELASTICSEARCH:
+				#print "esssssssssssssssssssssssssssssssssssssssssssss"
+				s = Search(index='triples').using(client).query("match", type="GAttribute").query("match",subject=unicode(node_id)).query("match", status = "PUBLISHED").query("match", attribute_type=unicode(gattr.id))
+				response = s.execute()
+				node_attr = response
+			else:
+				#print "mongoooooooooooooooooooooooooooooooooooooooooo"
+				node_attr = triple_collection.find_one({'_type':"GAttribute", "subject":unicode(node_id), 'attribute_type': gattr._id, 'status':u'PUBLISHED'})
         # print "\n attr_name: ", attr_name
-        gattr = node_collection.one({'_type': 'AttributeType', 'name': unicode(attr_name) })
-        if get_data_type:
+        #gattr = node_collection.one({'_type': 'AttributeType', 'name': unicode(attr_name) })
+        #s = Search(index='nodes').using(client).query("match", type='AttributeType').query("match", name=unicode(attr_name))
+        #res = s.execute()
+        #for hit in res:
+        #	gattr = hit
+        '''if get_data_type:
             data_type = gattr.data_type
-        if gattr: # and node  :
-            node_attr = triple_collection.find_one({'_type': "GAttribute", "subject": ObjectId(node_id), 'attribute_type': gattr._id, 'status': u"PUBLISHED"})
+	        if gattr: # and node  :
+	        	if GSTUDIO_ELASTICSEARCH:
+	        		print "esssssssssssssssssssssssssssssssssssssssssssss"
+	        		s = Search(index='triples').using(client).query("match", type="GAttribute").query("match",subject=unicode(node_id)).query("match", status = "PUBLISHED").query("match", attribute_type=unicode(gattr.id))
+	            	response = s.execute()
+	            	node_attr = response
+	            else:
+	            	print "mongoooooooooooooooooooooooooooooooooooooooooo"
+	            	node_attr = triple_collection.find_one({'_type':"GAttribute", "subject":unicode(node_id), 'attribute_type': gattr.id, 'status':u'PUBLISHED'})'''
     if node_attr:
         attr_val = node_attr.object_value
-        print "\n here: ", attr_name, " : ", type(attr_val), " : ", attr_val
+        # print "\n here: ", attr_name, " : ", type(attr_val), " : ", node_id
     if get_data_type:
         return {'value': attr_val, 'data_type': data_type}
     cache.set(cache_key, attr_val, 60 * 60)
@@ -1865,10 +1884,8 @@ def get_assesses_list(node):
 @register.assignment_tag
 def get_group_type(group_id, user):
     """This function checks for url's authenticity
-	
-    """
 
-    print "in get_group_type function"
+    """
     try:
         # Splitting url-content based on backward-slashes
         split_content = group_id.strip().split("/")
@@ -2377,14 +2394,12 @@ def check_is_gstaff(groupid, user):
   True -- If user is one of them, from the above specified list of categories.
   False -- If above criteria is not met (doesn't belongs to any of the category, mentioned above)!
   """
-  print "inside check_is_gstaff"
+
   group_name, group_id = Group.get_group_name_id(groupid)
-  print group_name
   cache_key = 'is_gstaff' + str(group_id) + str(user.id)
 
   if cache_key in cache:
-  	print "inside cache:",cache_key
-  	return cache.get(cache_key)
+    return cache.get(cache_key)
 
   groupid = groupid if groupid else 'home'
 
@@ -2848,6 +2863,7 @@ def get_version_of_module(module_id):
 @register.assignment_tag
 def get_group_name(groupid):
 	# group_name, group_id = get_group_name_id(groupid)
+	print groupid,"llllllllllllllllllllll"
 	return get_group_name_id(groupid)[0]
 
 
@@ -3086,11 +3102,7 @@ def jsonify(value):
     """Parses python value into json-type (useful in converting
     python list/dict into javascript/json object).
     """
-    print "type:",type(value)
-    if isinstance(value,AttrDict):
-    	value = value.to_dict()
-    elif isinstance(value,AttrList):
-    	value = list(value)
+
     return json.dumps(value, cls=NodeJSONEncoder)
 
 @get_execution_time
@@ -4169,7 +4181,7 @@ def get_selected_topics(node_id):
 
 @register.assignment_tag
 def rewind_cursor(cursor_obj):
-	cursor_obj.rewind()
+	#cursor_obj.rewind()
 	return cursor_obj
 
 @register.assignment_tag
@@ -4180,19 +4192,9 @@ def get_node_by_member_of_name(group_id, member_of_name):
 @get_execution_time
 @register.assignment_tag
 def cast_to_node(node_or_node_list):
-	print "cast_to_node"
-	print "\nInput type: ", type(node_or_node_list)
-	node_or_node_list = list(iter(node_or_node_list))
-	print "\nOutput type: ", type(node_or_node_list)
+	# print "\nInput type: ", type(node_or_node_list)
 	if isinstance(node_or_node_list, list):
-		if not isinstance(node_or_node_list[0],dict):
-			node_or_node_list = [each.to_dict() for each in node_or_node_list]
-			return node_or_node_list
-		else:
-			return map(Node,node_or_node_list)
-		# print "node",type(node_or_node_list[0]),node_or_node_list[0]
-		# nd = map(Node,node_or_node_list)
-		# print "Ddone with casting:",nd[0]
+		return map(Node,node_or_node_list)
 	else:
 		return Node(node_or_node_list)
 
@@ -4245,7 +4247,7 @@ def get_module_enrollment_status(request, module_obj):
             data_dict.update(_user_enrolled(userid, module_obj.collection_set))
             # data_dict.update({userid : all(userid in groupobj.author_set for ind, groupobj in module_obj.collection_dict.items())})
             data_dict.update({'full_enrolled': all(data_dict.values())})
-        print "\n data: ", data_dict
+        # print "\n data: ", data_dict
         return data_dict
     return _user_enrolled(request.user.pk, module_obj.collection_set)
     # return {request.user.pk : user_enrolled, 'full_enrolled': user_enrolled}

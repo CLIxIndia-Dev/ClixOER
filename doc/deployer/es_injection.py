@@ -17,49 +17,45 @@ except ImportError:  # old pymongo
 # reload(sys)
 # sys.setdefaultencoding('UTF8')
 
-es = Elasticsearch(GSTUDIO_ELASTIC_SEARCH_PROTOCOL+"://"+GSTUDIO_ELASTIC_SEARCH_SUPERUSER+":"+GSTUDIO_ELASTIC_SEARCH_SUPERUSER_PASSWORD+"@"+GSTUDIO_ELASTIC_SEARCH_ALIAS+":"+GSTUDIO_ELASTIC_SEARCH_PORT,timeout=100, retry_on_timeout=True)
+es = Elasticsearch(GSTUDIO_ELASTIC_SEARCH_PROTOCOL+"://"+GSTUDIO_ELASTIC_SEARCH_ALIAS+":"+GSTUDIO_ELASTIC_SEARCH_PORT,timeout=100, retry_on_timeout=True)
 
 #author_index = "author_" + GSTUDIO_SITE_NAME.lower()
 #index = GSTUDIO_SITE_NAME.lower()
 #gsystemtype_index = "node_type_" + GSTUDIO_SITE_NAME.lower()
-with open("/home/docker/code/gstudio/gnowsys-ndf/gnowsys_ndf/gstudio_configs/req_body.json") as req_body:
-    request_body = json.load(req_body)
-    print "request json",request_body
+#with open("/home/docker/code/gstudio/gnowsys-ndf/gnowsys_ndf/gstudio_configs/req_body.json") as req_body:
+    #request_body = json.load(req_body)
 with open("/home/docker/code/gstudio/gnowsys-ndf/gnowsys_ndf/gstudio_configs/triples.json") as triples:
     triples_body = json.load(triples)
-    print "triples json",triples_body
 
 
 page_id = 0
 
 
-def index_docs(all_docs,index,doc_type):
+def index_docs(all_docs,index,doc_type,request_body):
     k = 0
     all_docs_count = all_docs.count()
     for docs in all_docs:
-        print "[ %s/%s ] : %s " % (k, all_docs_count, docs._id)
-
-
+        #docs_id = docs._id
+	#print request_body
+       
         doc = json.dumps(docs, cls=NodeJSONEncoder)  # convert mongoDB object to a JSON string
         # doc = json.loads(doc,object_hook=json_util.object_hook) ->get back mongoDB object from JSON string
 
         document = json.loads(doc)  # convert JSON string to a python dictionary
         # doc = json.dumps(document) #convert python dictionary to JSON string
-        if document.get("_id") and document.get("_type"):
-            document["id"] = document.pop("_id")
-            document["type"] = document.pop("_type")
-
-            #for docs in doc_type:
-            print document["type"],doc_type[0]
-            #print document
-            # doc_type = document["type"].lower()
-            es.index(index=index, doc_type=doc_type[0].lower(), id=document["id"], body=document)
-
+       	# print request_body.pop("type")
+        document["id"] = document.pop("_id")
+        document["type"] = document.pop("_type")
+	print "[ %s/%s ] : %s " % (k, all_docs_count,document["id"])
+	print document["type"]
+        #for docs in doc_type:
+        #print document
+        #print document
+        #doc_type = document["type"].lower()
+	#print doc_type
+        #print index
+	es.index(index=index, doc_type=doc_type[0].lower(), id=document["id"], body=document)
         k += 1
-
-    #file_name.close()
-
-
 
 def get_document_type(document):
 
@@ -90,36 +86,32 @@ def main():
     triples = {}
     benchmarks = {}
     filehives = {}
-    buddys = {}
+    buddies = {}
     counters = {}
 
     #all_docs = [ triples, buddys, benchmarks, nodes, counters]
 
     print("Starting the indexing process...")
-    print(GSTUDIO_SITE_NAME)
+    
+
     for index, doc_type in GSTUDIO_ELASTIC_SEARCH_INDEX.items():
         temp = []
-
-        if GSTUDIO_SITE_NAME == "clix":
-            index_lower = index.lower()
-        else:
-            index_lower = GSTUDIO_SITE_NAME.lower()+"_"+index.lower()
-        print index_lower
+        index_lower = index.lower()
         if (not es.indices.exists(index_lower)):
-            if (index_lower.find("triples") != -1):
+            if (index_lower == "triples"):
+		print index_lower
                 res = es.indices.create(index=index_lower, body=triples_body)
             else:
-                print "inside not exists"
+		print index_lower
                 res = es.indices.create(index=index_lower, body=request_body)
 
         if (es.indices.exists(index_lower)):
-
+	    print("bhdvjdbjb")	
             res = es.search(index=index_lower, body={"query": {"match_all": {}}, "_source": ["id"]}, scroll="1m", size="10")
-            print "search response:",res
+	    print("ssbsb")
             scrollid = res['_scroll_id']
 
             while len(res['hits']['hits']) > 0:
-
                 for hit in res['hits']['hits']:
                     # print(hit["_source"]["id"])
                     # f.write(hit["_source"]["id"] + '\n')
@@ -128,18 +120,19 @@ def main():
                     temp.append(ObjectId(hit["_source"]["id"]))
 
                 res = es.scroll(scrollid, scroll="1m")
-            print "temp result:",temp
+		# 	print("heyyyyyyyyyyy")
 
-            if(index_lower.find("nodes") !=-1):
+            if(index_lower == "nodes"):
                 nodes = node_collection.find({ '_id': {'$nin': temp} }).batch_size(5)
-                print "nodes:",nodes.count()
+
                 if(nodes.count() == 0):
                     print("All "+ index_lower +" documents has injected to elasticsearch")
                     continue
                 else:
-                    index_docs(nodes, index_lower, doc_type)
+		    print nodes.count()
+                    index_docs(nodes, index_lower, doc_type, request_body)
 
-            elif (index_lower.find("triples") !=-1):
+            elif (index_lower == "triples"):
                 triples = triple_collection.find({ '_id': {'$nin': temp} }).batch_size(5)
                 if (triples.count() == 0):
                     print("All " + index_lower + " documents has injected to elasticsearch")
@@ -147,40 +140,39 @@ def main():
                 else:
                     # f = open("/data/triples.txt", "w")
                     # os.chmod("/data/triples.txt", 0o777)
-                    index_docs(triples, index_lower, doc_type)
+                    index_docs(triples, index_lower, doc_type, triple_body)
 
-            elif (index_lower.find("benchmarks") !=-1 ):
+            elif (index_lower == "benchmarks"):
                 benchmarks = benchmark_collection.find({ '_id': {'$nin': temp} }).batch_size(5)
                 if (benchmarks.count() == 0):
                     print("All " + index_lower + " documents has injected to elasticsearch")
                     continue
                 else:
-                    index_docs(benchmarks, index_lower, doc_type)
+                    index_docs(benchmarks, index_lower, doc_type, request_body)
 
-            elif (index_lower.find("filehives")!=-1):
+            elif (index_lower == "filehives"):
                 filehives = filehive_collection.find({ '_id': {'$nin': temp} }).batch_size(5)
-                print filehives.count()
                 if (filehives.count() == 0):
                     print("All " + index_lower + " documents has injected to elasticsearch")
                     continue
                 else:
-                    index_docs(filehives, index_lower, doc_type)
+                    index_docs(filehives, index_lower, doc_type, request_body)
                     
-            elif (index_lower.find("buddies")!=-1):
+            elif (index_lower == "buddies"):
                 buddys = buddy_collection.find({ '_id': {'$nin': temp} }).batch_size(5)
                 if (buddys.count() == 0):
                     print("All " + index_lower + " documents has injected to elasticsearch")
                     continue
                 else:
-                    index_docs(buddys, index_lower, doc_type)
+                    index_docs(buddys, index_lower, doc_type, request_body)
 
-            elif (index_lower.find("counters")!=-1):
+            elif (index_lower == "counters"):
                 counters = counter_collection.find({ '_id': {'$nin': temp} }).batch_size(5)
                 if (counters.count() == 0):
                     print("All " + index_lower + " documents has injected to elasticsearch")
                     continue
                 else:
-                    index_docs(counters, index_lower, doc_type)
+                    index_docs(counters, index_lower, doc_type, request_body)
 
 
             #print(res['_scroll_id'])

@@ -2,6 +2,11 @@ from base_imports import *
 from node import Node, node_collection
 from filehive import filehive_collection
 
+from gnowsys_ndf.settings import GSTUDIO_ELASTICSEARCH
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search,connections,Q
+import json
+client = Elasticsearch('banta_i:9200')
 
 @connection.register
 class GSystem(Node):
@@ -71,11 +76,18 @@ class GSystem(Node):
             existing_fh_obj = fh_obj.check_if_file_exists(uploaded_file)
 
             if existing_fh_obj:
+                '''if GSTUDIO_ELASTICSEARCH:
+                    existing_fh_obj.id = str(existing_fh_obj.id)
+                    q = Q("match",type = "GSystem")&Q("match",if_file.original.id = existing_fh_obj.id)
+                    s = Search(index = 'nodes').using(client).query(q)
+                    res = s.execute()
+                    existing_file_gs = res
+                else:'''
                 existing_file_gs = node_collection.find_one({
                                     '_type': 'GSystem',
                                     'if_file.original.id': existing_fh_obj._id
                                 })
-            print kwargs
+
             if kwargs.has_key('unique_gs_per_file') and kwargs['unique_gs_per_file']:
 
                 if existing_file_gs:
@@ -83,13 +95,21 @@ class GSystem(Node):
                     return existing_file_gs
 
         self.fill_node_values(request, **kwargs)
-
+        print 
+        print 
+        print self,"////////////////////"
+        print 
+        print 
+        print uploaded_file,"UPLOADED_FILE****************"
+        print 
+        print 
         # fill gsystem's field values:
         self.author_set = author_set
 
         user_id = self.created_by
 
         # generating '_id':
+
         if not self.has_key('_id'):
             self['_id'] = ObjectId()
 
@@ -100,10 +120,16 @@ class GSystem(Node):
         #     self['origin'] = request.POST.get('origin', '').strip()
 
         if existing_file_gs:
-
+            print "i am here ...*****************************"
+            print 
+            print 
             existing_file_gs_if_file = existing_file_gs.if_file
 
             def __check_if_file(d):
+                print "in function..........."
+                print d,"dddddddddddddddddddddddddddddddddd"
+                print 
+                print
                 for k, v in d.iteritems():
                     if isinstance(v, dict):
                         __check_if_file(v)
@@ -118,13 +144,20 @@ class GSystem(Node):
         elif uploaded_file and not existing_file_gs:
             original_filehive_obj   = filehive_collection.collection.Filehive()
             original_file           = uploaded_file
-
             file_name = original_filehive_obj.get_file_name(original_file)
+            print 
+            print
+            print file_name,"88888888888888888888888888888888888"
             if not file_name:
                 file_name = self.name
             mime_type = original_filehive_obj.get_file_mimetype(original_file, file_name)
             original_file_extension = original_filehive_obj.get_file_extension(file_name, mime_type)
-
+            print 
+            print
+            print mime_type,"88888888888888888888888888888888888"
+            print 
+            print
+            print original_file_extension,"88888888888888888888888888888888888"
             file_exists, original_filehive_obj = original_filehive_obj.save_file_in_filehive(
                 file_blob=original_file,
                 file_name=file_name,
@@ -191,9 +224,10 @@ class GSystem(Node):
         if copyright:
             if self.legal['copyright'] is not copyright:
                 self.legal['copyright'] = copyright
-        else:
-            self.legal['copyright'] = GSTUDIO_DEFAULT_COPYRIGHT
 
+        print 
+        print 
+        print self,"444444444444444444444444444444"
         return self
 
 
@@ -210,15 +244,23 @@ class GSystem(Node):
 
 
     def get_file(self, md5_or_relurl=None):
-
+        print "----------------in get_file brooo----------------------------"
         file_blob = None
 
         try:
             if md5_or_relurl:
+                print
+                print 
+                print "---------------- in try ---------------------------"
                 file_blob = gfs.open(md5_or_relurl)
-        except Exception as e:
+                print 
+                print 
+                print file_blob
+        except Exception, e:
                 print "File '", md5_or_relurl, "' not found: ", e
-
+        print file_blob
+        print 
+        print "/////////////////////////////////////////////"
         return file_blob
 
 

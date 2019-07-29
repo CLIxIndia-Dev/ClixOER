@@ -27,6 +27,12 @@ from django_mongokit import get_database
 from django_mongokit.document import DjangoDocument
 from django.core.files.images import get_image_dimensions
 
+from gnowsys_ndf.settings import GSTUDIO_ELASTICSEARCH
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search,connections,Q
+import json
+client = Elasticsearch('banta_i:9200')
+
 from mongokit import IS, OR
 from mongokit import INDEX_ASCENDING, INDEX_DESCENDING
 
@@ -1800,7 +1806,13 @@ class GSystem(Node):
             existing_fh_obj = fh_obj.check_if_file_exists(uploaded_file)
 
             if existing_fh_obj:
-                existing_file_gs = node_collection.find_one({
+                if GSTUDIO_ELASTICSEARCH:
+                    q = Q("match",type = "GSystem")&Q("match",if_file.original.id = str(existing_fh_obj.id))
+                    s = Search(index = 'nodes').using(client).query(q)
+                    res = s.execute()
+                    existing_file_gs = res
+                else:
+                    existing_file_gs = node_collection.find_one({
                                     '_type': 'GSystem',
                                     'if_file.original.id': existing_fh_obj._id
                                 })
@@ -2499,14 +2511,28 @@ class Group(GSystem):
 
         # case-1: argument - "group_name_or_id" is ObjectId
         if ObjectId.is_valid(group_name_or_id):
-
-            group_obj = node_collection.one({"_id": ObjectId(group_name_or_id),
-                "_type": {"$in": ["Group", "Author"]}})
+            if GSTUDIO_ELASTICSEARCH:
+                print "essssssssssssssssssssss 2515 _models.py"
+                group_name_or_id = str(group_name_or_id)
+                q1 = Q("match",id=group_name_or_id)
+                q2 = Q("match", type = "Group")|Q("match", type = "Author")
+                q3 = q2&q1
+                s = Search(index = 'nodes').using(client).query(q3)
+                res = s.execute()
+                for hit in res:
+                    group_obj = hit
+            else:
+                print "mdddddddddddddddddddd 2525 _models.py"
+                group_obj = node_collection.one({"_id": ObjectId(group_name_or_id),
+                    "_type": {"$in": ["Group", "Author"]}})
 
             # checking if group_obj is valid
             if group_obj:
                 # if (group_name_or_id == group_obj._id):
-                group_id = ObjectId(group_name_or_id)
+                if GSTUDIO_ELASTICSEARCH:
+                    group_id = group_name_or_id
+                else:
+                    group_id = ObjectId(group_name_or_id)
                 group_name = group_obj.name
 
                 if get_obj:
@@ -2520,14 +2546,28 @@ class Group(GSystem):
 
         # case-2: argument - "group_name_or_id" is group name
         else:
-            group_obj = node_collection.one(
-                {"_type": {"$in": ["Group", "Author"]}, "name": unicode(group_name_or_id)})
+            if GSTUDIO_ELASTICSEARCH:
+                print "essssssssssssssssssssss 2550 _models.py"
+                q1 = Q("match", name=group_name_or_id)
+                q2 = Q("match", type = "Group")|Q("match", type = "Author")
+                q3 = q2&q1
+                s = Search(index = 'nodes').using(client).query(q3)
+                res = s.execute()
+                for hit in res:
+                    group_obj = hit
+            else:
+                print "mdddddddddddddddddddd 2559 _models.py"
+                group_obj = node_collection.one({"name": unicode(group_name_or_id),
+                    "_type": {"$in": ["Group", "Author"]}})
 
             # checking if group_obj is valid
             if group_obj:
                 # if (group_name_or_id == group_obj.name):
                 group_name = group_name_or_id
-                group_id = group_obj._id
+                if GSTUDIO_ELASTICSEARCH:
+                    group_id = group_obj.id
+                else:
+                    group_id = group_obj._id
 
                 if get_obj:
                     return group_obj

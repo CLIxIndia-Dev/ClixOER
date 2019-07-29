@@ -28,12 +28,37 @@ GSTUDIO_DEFAULT_FACTORY_GROUPS = {'home': GROUP_SETTING_1,
              'warehouse':GROUP_SETTING_2, 'Trash': GROUP_SETTING_1,
              'desk': GROUP_SETTING_2, 'help': GROUP_SETTING_2}
 
+OER = ["Mathematics"
+       "Science"]
+# Elastic Search
+GSTUDIO_DOCUMENT_MAPPING = '/data'
+GSTUDIO_ELASTIC_SEARCH = True
+GSTUDIO_ELASTIC_SEARCH_PROTOCOL = 'http' # we can use http or https protocol
+GSTUDIO_ELASTIC_SEARCH_ALIAS = 'banta_i'
+GSTUDIO_ELASTIC_SEARCH_SUPERUSER = ''
+GSTUDIO_ELASTIC_SEARCH_SUPERUSER_PASSWORD = ''
+GSTUDIO_ELASTIC_SEARCH_PORT = '9200'
+TESTING_VARIABLE_FOR_ES = False
+GSTUDIO_ELASTIC_SEARCH_IN_NODE_CLASS = True
+GSTUDIO_ELASTIC_SEARCH_IN_FILEHIVE_CLASS= True
+GSTUDIO_ELASTIC_SEARCH_IN_BENCHMARK_CLASS = True
+GSTUDIO_ELASTICSEARCH = False
 GSTUDIO_ALTERNATE_OPTS = ['Size', 'Format', 'Language','Content','Other']
 GSTUDIO_ALTERNATE_FORMATS = {'image':['png','jpeg'],'video':['mkv','webm'],'audio':['mp3']}
 GSTUDIO_ALTERNATE_SIZE = {'image':['100px','1048px'],'video':['144px','720px'],'audio':['128kbps']}
 GSTUDIO_DEFAULT_GROUP = u'desk'
 GSTUDIO_EDUCATIONAL_SUBJECTS_AS_GROUPS = False
+GLITE_RCS_REPO_DIRNAME = "glite-rcs-repo"
+GSTUDIO_ELASTIC_SEARCH_INDEX = {
+ #"Filehives": ["Filehives"],
+ #"Buddies": ["Buddies"],
+ #"Benchmarks": ["Benchmarks"],
+ "Nodes": ["Nodes"],
+ #"Counters": ["Counters"]
+}
 
+GSTUDIO_ELASTIC_SEARCH_IN_NODE_CLASS = True
+GSTUDIO_ELASTICSEARCH = True
 LANGUAGES = (('en', 'English'), ('hi', 'Hindi'), ('te', 'Telugu'))
 HEADER_LANGUAGES = (('en', 'English'), ('hi', u'\u0939\u093f\u0902\u0926\u0940'),('te', u'\u0c24\u0c46\u0c32\u0c41\u0c17\u0c41'))
 GSTUDIO_DEFAULT_LANGUAGE = ('en', 'English')
@@ -263,39 +288,20 @@ django.conf.locale.LANG_INFO = LANG_INFO
 # Override following variables in local_settings file:
 #
 # SMTP setting for sending mail (Using python default SMTP server)
-# EMAIL_USE_TLS = True
-# EMAIL_HOST = '127.0.0.1'
-# EMAIL_PORT = 1025
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# EMAIL_HOST_USER = ''
-# EMAIL_HOST_PASSWORD = ''
-#DEFAULT_FROM_EMAIL = 'testing@example.com'
-
-# Authentication related and Error reporting emails
-# EMAIL_USE_TLS = ""
-# ACCOUNT_ACTIVATION_DAYS = 2
-# #EMAIL_HOST = 'localhost'
-# EMAIL_HOST = 'localhost'
-# #DEFAULT_FROM_EMAIL = 'webmaster@clix.ss.org'
-# DEFAULT_FROM_EMAIL = 'gdswetha@gmail.com'
-# LOGIN_REDIRECT_URL = '/'
-# EMAIL_SUBJECT_PREFIX='[clix-ss-error-reporting]'
-# SERVER_EMAIL = DEFAULT_FROM_EMAIL
-# EMAIL_PORT = ""
-# ADMINS = (
-#     "mrunal4888@gmail.com"
-# )
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
+EMAIL_USE_TLS = False
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 1025
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+DEFAULT_FROM_EMAIL = 'testing@example.com'
 #
 # SMTP setting for sending mail (e.g: gmail SMTP server)
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_PORT = 25
-EMAIL_HOST_USER = 'gdswetha@gmail.com'
-EMAIL_HOST_PASSWORD = 'inter15'
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# EMAIL_USE_TLS = True
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_HOST_USER = 'yourcompletegmailaddr'
+# EMAIL_HOST_PASSWORD = 'yourpassword'
+#
 # The following email id and password for the email account will be used for sending/receiving SYNCDATA
 SYNCDATA_KEY_PUB = ""
 SYNCDATA_FROM_EMAIL_ID = ""
@@ -416,11 +422,19 @@ MEDIA_URL = '/media/'
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = '/static/'
+STATIC_ROOT = '/static'
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
+
+#import os
+#SETTINGS_ROOT = os.path.dirname(__file__)
+
+#STATIC_ROOT = os.path.join(SETTINGS_ROOT, "static")
+
+#STATIC_URL = '/static/'
+
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -497,6 +511,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     # 'django.core.context_processors.csrf',
 )
 
+print STATICFILES_DIRS
 
 djcelery.setup_loader()
 # # CELERY_RESULT_BACKEND = "mongodb"
@@ -622,7 +637,7 @@ GSTUDIO_WORKING_GAPPS = [
 ]
 
 GSTUDIO_REGISTRATION = True
-GSTUDIO_OER_GROUPS = ['Mathematics','Science','English']
+
 GSTUDIO_SECOND_LEVEL_HEADER = True
 GSTUDIO_MY_GROUPS_IN_HEADER = True
 GSTUDIO_MY_COURSES_IN_HEADER = False
@@ -1056,38 +1071,11 @@ GSTUDIO_INSTITUTE_NAME = ''
 #
 # --- End of BUDDY Module ---
 
-GSTUDIO_ELASTIC_SEARCH_PASSWORD = ""
-
-# Elastic Search
-GSTUDIO_DOCUMENT_MAPPING = '/data'
-GSTUDIO_ELASTIC_SEARCH = True
-GSTUDIO_ELASTIC_SEARCH_PROTOCOL = 'http' # we can use http or https protocol
-GSTUDIO_ELASTIC_SEARCH_ALIAS = 'localhost'
-GSTUDIO_ELASTIC_SEARCH_SUPERUSER = ''
-GSTUDIO_ELASTIC_SEARCH_SUPERUSER_PASSWORD = ''
-GSTUDIO_ELASTIC_SEARCH_PORT = '9201'
-TESTING_VARIABLE_FOR_ES = False
-GSTUDIO_ELASTIC_SEARCH_IN_NODE_CLASS = True
-GSTUDIO_ELASTIC_SEARCH_IN_FILEHIVE_CLASS= True
-GSTUDIO_ELASTIC_SEARCH_IN_BENCHMARK_CLASS = True
-# --- End of Elastic Search
-
-GLITE_RCS_REPO_DIRNAME = "glite-rcs-repo"
-GLITE_RCS_REPO_DIR = os.path.join('/data/', RCS_REPO_DIRNAME)
-
-GSTUDIO_ELASTIC_SEARCH_INDEX = {
-  "Filehives": ["Filehive"],
-  "Triples": ["Triple"],
-  # "Buddies": ["Buddy"],
-  # "Benchmarks": ["Benchmark"],
-  "Nodes": ["Node"],
-  # "Counters": ["Counter"]
-}
 
 # # textb
 # import warnings
 # warnings.filterwarnings(
-#         'error', r"DateTimeField received a naive datetime",
+#         'error', r"DateTimeField received a naive datetime",client = Elasticsearch('banta_i:9200')
 #         RuntimeWarning, r'django\.db\.models\.fields')
 # # textb
 

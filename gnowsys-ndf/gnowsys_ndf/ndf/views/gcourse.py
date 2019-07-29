@@ -23,6 +23,12 @@ try:
 except ImportError:  # old pymongo
     from pymongo.objectid import ObjectId
 
+from gnowsys_ndf.settings import GSTUDIO_ELASTICSEARCH
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search,connections,Q
+import json
+client = Elasticsearch('banta_i:9200')
+
 ''' -- imports from application folders/files -- '''
 from gnowsys_ndf.ndf.models import *
 from gnowsys_ndf.settings import GAPPS, MEDIA_ROOT, GSTUDIO_TASK_TYPES
@@ -2176,13 +2182,20 @@ def _get_current_and_old_display_pics(group_obj):
 # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 # :::::::::::::::::::::::::::::::::COURSE-PLAYER VIEWS::::::::::::::::::::::
 # ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
+    
 # :::::::::::::::::::::::::::::::::TAB VIEWS BEGINS::::::::::::::::::::::
 @get_execution_time
 def course_content(request, group_id):
-    print "In course_content",group_id, request.LANGUAGE_CODE
+
     group_obj   = get_group_name_id(group_id, get_obj=True)
-    group_id    = group_obj._id
+    print group_obj.name
+    print group_obj.id
+    if GSTUDIO_ELASTICSEARCH:
+        print "essssssssssssssssssssss"
+        group_id    = group_obj.id
+    else:
+        print "mddddddddddddddddddddd"
+        group_id    = group_obj._id
     group_name  = group_obj.name
     allow_to_join = get_group_join_status(group_obj)
     template = 'ndf/gcourse_event_group.html'
@@ -2199,7 +2212,6 @@ def course_content(request, group_id):
         counter_obj = Counter.get_counter_obj(request.user.id, ObjectId(group_id))
         if counter_obj:
             # visited_nodes = map(str,counter_obj['visited_nodes'].keys())
-            #print counter_obj
             visited_nodes = counter_obj['visited_nodes']
     context_variables = RequestContext(request, {
             'group_id': group_id, 'groupid': group_id, 'group_name':group_name,
@@ -2336,7 +2348,6 @@ def course_raw_material(request, group_id, node_id=None,page_no=1):
     files_cur = None
     allow_to_join = get_group_join_status(group_obj)
     banner_pic_obj,old_profile_pics = _get_current_and_old_display_pics(group_obj)
-    print banner_pic_obj,old_profile_pics
     '''
     banner_pic_obj = None
     old_profile_pics = []
@@ -2374,7 +2385,6 @@ def course_raw_material(request, group_id, node_id=None,page_no=1):
     
 
     for each in asset_nodes:
-        print "assest of the unit: ", node_id,each
         each.get_neighbourhood(each.member_of)
 
     asset_nodes.rewind()
@@ -2389,7 +2399,6 @@ def course_raw_material(request, group_id, node_id=None,page_no=1):
         thread_node = None
         allow_to_comment = None
         thread_node, allow_to_comment = node_thread_access(group_id, file_obj)
-        print "node_thread_access", thread_node,allow_to_comment
         context_variables.update({'file_obj': file_obj, 'allow_to_comment':allow_to_comment})
         #updating counters collection
         # update_notes_or_files_visited(request.user.id, ObjectId(group_id),ObjectId(node_id),True,False)
@@ -2643,7 +2652,6 @@ def course_note_page(request, group_id):
 @login_required
 @get_execution_time
 def inline_edit_res(request, group_id):
-    print "inside inline_edit_res of course"
     group_obj   = get_group_name_id(group_id, get_obj=True)
     group_id    = group_obj._id
     group_name  = group_obj.name
@@ -2671,7 +2679,6 @@ def inline_edit_res(request, group_id):
             template = 'ndf/node_ajax_content.html'
             context_variables['no_discussion'] = True
             context_variables['node'] = node_obj
-    print template
     return render_to_response(template, context_variables, context_instance = RequestContext(request))
 
 @get_execution_time
@@ -2811,15 +2818,7 @@ def course_analytics(request, group_id, user_id, render_template=False, get_resu
                 'notapplicable_quizitems': 0,
                 'incorrect_attempted_quizitems': 0,
                 'attempted_quizitems': 0,
-                'admin_view': False,
-                # As progress CSV is failing, as the assessment level details are not set, hence assigining default values
-                'correct_attempted_assessments': 0,
-                'unattempted_assessments': 0,
-                'visited_assessments': 0,
-                'notapplicable_assessments': 0,
-                'incorrect_attempted_assessments': 0,
-                'attempted_assessments': 0,
-                'total_assessment_items': 0
+                'admin_view': False
             })
     data_points_dict = {}
     assessment_and_quiz_data = kwargs.get('assessment_and_quiz_data', False)
@@ -2879,9 +2878,9 @@ def course_analytics(request, group_id, user_id, render_template=False, get_resu
         completed_modules = analytics_instance.get_completed_modules_count()
         # Units Section
         all_units = analytics_instance.get_total_units_count()
-        #print "\n Total Units =  ", all_units, "\n\n"
+        # print "\n Total Units =  ", all_units, "\n\n"
         completed_units = analytics_instance.get_completed_units_count()
-        #print "\n Completed Units =  ", completed_units, "\n\n"
+        # print "\n Completed Units =  ", completed_units, "\n\n"
         analytics_data['level1_lbl'] = "Module Completion"
         analytics_data['level2_lbl'] = "Unit Completion"
         analytics_data['level1_progress_stmt'] = str(completed_modules) + " out of " + str(all_modules) + " Modules completed"
@@ -2899,17 +2898,17 @@ def course_analytics(request, group_id, user_id, render_template=False, get_resu
         # Depricated on 27Apr2017 - katkamrachana
         analytics_data['total_quizitems'] = analytics_instance.get_total_quizitems_count()
         # New implementation of using AT: 'total_assessment_items'
-        #print "\n Total QuizItemEvents === ", analytics_data['total_quizitems'], "\n\n"
+        # print "\n Total QuizItemEvents === ", analytics_data['total_quizitems'], "\n\n"
         # analytics_data['attempted_quizitems'] = counter_obj.no_questions_attempted
         analytics_data['attempted_quizitems'] = counter_obj['quiz']['attempted']
-        #print "\n Attempted QuizItemEvents === ", analytics_data['attempted_quizitems'], "\n\n"
+        # print "\n Attempted QuizItemEvents === ", analytics_data['attempted_quizitems'], "\n\n"
         if 'correct_attempted_quizitems' not in analytics_data:
             # analytics_data['correct_attempted_quizitems'] = counter_obj.no_correct_answers
             analytics_data['correct_attempted_quizitems'] = counter_obj['quiz']['correct']
-        #print "\n Correct Attempted QuizItemEvents === ", analytics_data['correct_attempted_quizitems'], "\n\n"
+        # print "\n Correct Attempted QuizItemEvents === ", analytics_data['correct_attempted_quizitems'], "\n\n"
         # analytics_data['incorrect_attempted_quizitems'] = counter_obj.no_incorrect_answers
         analytics_data['incorrect_attempted_quizitems'] = counter_obj['quiz']['incorrect']
-        #print "\n InCorrect Attempted QuizItemEvents === ", analytics_data['incorrect_attempted_quizitems'], "\n\n"
+        # print "\n InCorrect Attempted QuizItemEvents === ", analytics_data['incorrect_attempted_quizitems'], "\n\n"
 
     # Resources Section
     # analytics_data['total_res'] = analytics_instance.get_total_resources_count()
@@ -3029,7 +3028,7 @@ def course_analytics(request, group_id, user_id, render_template=False, get_resu
     if 'user_notes' not in analytics_data:
         # analytics_data['user_notes'] = counter_obj.no_notes_written
         analytics_data['user_notes'] = counter_obj['page']['blog']['created']
-    print "\n User Notes === ", analytics_data['user_notes'], "\n\n"
+    # print "\n User Notes === ", user_notes, "\n\n"
 
     # Files Section
     # analytics_data['total_files'] = analytics_instance.get_total_files_count()
@@ -3117,8 +3116,7 @@ def course_analytics(request, group_id, user_id, render_template=False, get_resu
     if kwargs.get('get_counter_obj_in_result', False):
         analytics_data['counter_obj'] = counter_obj
     del analytics_instance
-    print "Analytics data\n\n",
-    print analytics_data
+    # print analytics_data
 
     if get_result_dict:
         return analytics_data
@@ -3308,14 +3306,11 @@ def manage_users(request, group_id):
 
 @get_execution_time
 def assets(request, group_id, asset_id=None,page_no=1):
-    #import ipdb;ipdb.set_trace()
-    print "inside assets",group_id,asset_id
     try:
         group_id = ObjectId(group_id)
     except:
         group_name, group_id = get_group_name_id(group_id)
     group_obj = get_group_name_id(group_id, get_obj=True)
-    print "Group name", group_obj.name
     asset_gst_name, asset_gst_id = GSystemType.get_gst_name_id("Asset")
     from gnowsys_ndf.settings import GSTUDIO_NO_OF_OBJS_PP
     #template = 'ndf/gevent_base.html'
@@ -3327,8 +3322,6 @@ def assets(request, group_id, asset_id=None,page_no=1):
         
         asset_nodes = node_collection.find({'member_of': {'$in': [asset_gst_id]},
             'group_set': {'$all': [ObjectId(group_id)]}}).sort('last_update', -1)
-        print "assetnodes",asset_nodes.count()
-
         # topic_nodes = node_collection.find({'member_of': {'$in': [topic_gst_id]}})
         # assetcontent_page_info = paginator.Paginator(asset_content_list['grel_node'], page_no, GSTUDIO_NO_OF_OBJS_PP)
         context_variables = {
@@ -3337,11 +3330,8 @@ def assets(request, group_id, asset_id=None,page_no=1):
             'asset_nodes':asset_nodes,'asset_content_list':asset_content_list,
             'group_obj':group_obj, 'group_name':group_obj.name
         }
-        print "before if loop",context_variables
-        print group_name
-        print group_obj._id
         if 'announced_unit' in group_obj.member_of_names_list or 'Group' in group_obj.member_of_names_list and 'base_unit' not in group_obj.member_of_names_list :
-            
+                 
             if 'raw@material' in asset_obj.tags:
                 context_variables.update({'title':'raw_material_detail'})
                 template = 'ndf/lms.html'
@@ -3365,7 +3355,7 @@ def assets(request, group_id, asset_id=None,page_no=1):
             'asset_nodes': asset_nodes,'title':'asset_list',
             'group_obj':group_obj,'assets_page_info':assets_page_info
         }
-    print context_variables['title']
+    
     return render_to_response(template,
                                 context_variables,
                                 context_instance = RequestContext(request)
@@ -3374,13 +3364,10 @@ def assets(request, group_id, asset_id=None,page_no=1):
 @get_execution_time
 def assetcontent_detail(request, group_id, asset_id,asst_content_id,page_no=1):
     from gnowsys_ndf.settings import GSTUDIO_NO_OF_OBJS_PP
-    #import ipdb;ibdb.set_trace()
     assetcontent_obj = node_collection.one({'_id': ObjectId(asst_content_id)})
     asset_obj = node_collection.one({'_id': ObjectId(asset_id)})
     group_obj = get_group_name_id(group_id, get_obj=True)
-
-    print "inside assetcontent_detail",group_id,asset_id,asst_content_id
-    
+    # print group_id,asset_id,asst_content_id
     asset_content_list = get_relation_value(ObjectId(asset_obj._id),'has_assetcontent')
     template = 'ndf/lms.html'
     assetcontent_page_info = paginator.Paginator(asset_content_list['grel_node'], page_no, GSTUDIO_NO_OF_OBJS_PP)
@@ -3412,7 +3399,6 @@ def create_edit_course_page(request, group_id, page_id=None,page_type=None):
     group_obj = get_group_name_id(group_id, get_obj=True)
     group_id = group_obj._id
     group_name = group_obj.name
-    print "inside create_edit_activity",group_id
     #template = 'ndf/gevent_base.html'
     template = 'ndf/lms.html'
     # templates_gst = node_collection.one({"_type":"GSystemType","name":"Template"})
@@ -3451,7 +3437,6 @@ def course_pages(request, group_id, page_id=None,page_no=1):
     group_id = group_obj._id
     group_name = group_obj.name
     #template = 'ndf/gevent_base.html'
-    print "inside course_pages",group_id
     template = 'ndf/lms.html'
     context_variables = {
             'group_id': group_id, 'groupid': group_id, 'group_name':group_name,
@@ -3494,7 +3479,6 @@ def save_course_page(request, group_id):
     group_obj = get_group_name_id(group_id, get_obj=True)
     group_id = group_obj._id
     group_name = group_obj.name
-    print "in save page",group_id,group_name
     tags = request.POST.get("tags",[])
     if tags:
         tags = json.loads(tags)
@@ -3519,6 +3503,7 @@ def save_course_page(request, group_id):
             page_obj = node_collection.collection.GSystem()
             page_obj.fill_gstystem_values(request=request)
             page_obj.member_of = [page_gst_id]
+            page_obj.group_set = [group_id]
             page_obj.altnames = unicode(alt_name)
             if is_info_page == "Info":
                 info_page_gst_name, info_page_gst_id = GSystemType.get_gst_name_id('Info page')

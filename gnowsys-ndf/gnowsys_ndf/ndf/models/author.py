@@ -1,6 +1,11 @@
 from base_imports import *
 from group import *
 
+from gnowsys_ndf.settings import GSTUDIO_ELASTICSEARCH
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search,connections,Q
+import json
+client = Elasticsearch('banta_i:9200')
 
 @connection.register
 class Author(Group):
@@ -65,7 +70,16 @@ class Author(Group):
     @staticmethod
     def get_author_obj_from_name_or_id(username_or_userid_or_authid):
         try:
-            return node_collection.one({'_type': u'Author', 'created_by': int(username_or_userid_or_authid)})
+            if GSTUDIO_ELASTICSEARCH:
+                q = Q("match",type = "Author")&Q("match",created_by = username_or_userid_or_authid)
+                print q
+                s = Search(index = 'nodes').using(client).query(q)
+                res = s.execute()
+                for hit in res:
+                    node = hit
+                return node
+            else:
+                return node_collection.one({'_type': u'Author', 'created_by': int(username_or_userid_or_authid)})
         except Exception as e:
             return Group.get_group_name_id(username_or_userid_or_authid, get_obj=True)
 
