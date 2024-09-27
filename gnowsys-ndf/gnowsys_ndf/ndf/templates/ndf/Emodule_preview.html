@@ -227,9 +227,19 @@ codeURIComponent(document.title), '_blank'))" target="_blank">
 
 {% if pkg.id.strip %}
 
+   {% if pkg.name == "CLIxScienceModules_v2.4.0-Hi.exe" %}
+        <a href="{% url 'read_file' moduledetails.id pkg.id  %}"
+download="{{pkg.name}}">             <i style="color: #5088c7;" class="fas fa-cloud-download-alt ml-4 fa-lg"></i></a>   
+    {% elif pkg.name == "CLIxMathModules_v2.4.0-Hi.exe"  %}
+       <a href="{% url 'read_file' moduledetails.id pkg.id  %}"
+download="{{pkg.name}}">             <i style="color: #5088c7;" class="fas fa-cloud-download-alt ml-4 fa-lg"></i></a>
+{% else %}  
+     
+  
                           <a href="{% url 'read_file' moduledetails.id pkg.id  %}"
 download="{{pkg.name}}.exe">             <i style="color: #5088c7;" class="fas fa-cloud-download-alt ml-4 fa-lg"></i></a>
-  
+
+   {% endif %}  
 {% else %}
                            <a href="" download="{{dest.name}}"></a>
 {% endif %}
@@ -447,7 +457,7 @@ g"> &nbsp; {% for each_attr in moduledetails.grade %}{{each_attr|slice:"5:"}}
 {% else %}
 <div class="col-12 col-md-2 mt-5">
 
-<p> <a class="btn btn-sm" style="background-color:#5088c7;"  href="https://clixoer.tiss.edu/5752ad5a2e01310a05dca583/domain/{{moduledetails.subject}}/#team"> {% trans  'Read more' %}  </a> 
+<p> <a class="btn btn-sm" style="background-color:#5088c7;"  target="_blank" href="/5752ad5a2e01310a05dca583/domain/{{moduledetails.subject}}/#team"> {% trans  'Read more' %}  </a> 
 </p>
 </div>
 {% endif %}

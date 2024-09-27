@@ -6,27 +6,28 @@
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb " style="margin-left:1rem;">
             <li class="breadcrumb-item " style="margin-left:0rem;"aria-current="page" style="color:#000;"> <a style="color:#fff; text-decoration: none;"
- href="{% url 'e-library' group_id  %}">  <i class="ml-n4 fas fa-home fa-lg"></i> {% trans   'E-library' %}  </li> </a>
+ href="{% url 'e-library' groupid  %}">  <i class="ml-n4 fas fa-home fa-lg"></i> {% trans   'E-library' %}  </li> </a>
           <!--  <li class="breadcrumb-item " aria-current="page"> Math</li> -->
        </ol>
         </nav>
         
     </div>
-      <div class="col-6 col-sm-3 dropdown" data-toggle="tooltip"  > <button type="button"  class="btn btn-primary butn mx-n2" data-toggle="dropdown" id="dropdownMenuButton"  data-toggle="tooltip" title="{% trans "Download offline version of all modules" %}"> {% trans  'Download All' %} &nbsp;<i data-toggle="tooltip"  class="fas fa-cloud-download-alt" ></i>
+      <div class="col-6 col-sm-3 dropdown" data-toggle="tooltip"  > <button type="button"  class="btn btn-primary butn mx-n2" data-toggle="dropdown" id="dropdownMenuButton"  data-toggle="tooltip" title="{% trans 'Download offline version of all modules' %}"> {% trans  'Download All' %} &nbsp;<i data-toggle="tooltip"  class="fas fa-cloud-download-alt" ></i>
 
 </button>
 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" data-toggle="modal"
-data-target="#unplatformMu">
-    <a class="dropdown-item"  href="/media/{{allpckgs|get_item:'English-en'}}" Download="CLIxEnglishModules_v2.4.0-En.exe">
+     data-target="#unplatformMu">
+  {{lang}}
+    {% get_downloadpckg 'english' lang as eng_pkg %}
+    <a class="dropdown-item"  href="{% url 'read_file' groupid eng_pkg.id  %}" Download="{{eng_pkg.name}}.exe">
   Download all of CLIxEnglish modules
-</a>
-    {% with "Mathematics-"|add:lang as key %}
-    <a class="dropdown-item"  href="/media/{{allpckgs|get_item:key}}" Download="CLIxMathModules_v2.4.0-{{lang}}">Download all of CLIxMathematics modules
-    {% endwith %}
-</a>
-    {% with "Science-"|add:lang as key %}
-    <a class="dropdown-item" href="/media/{{allpckgs|get_item:key}}" Download="CLIxScienceModules_v2.4.0-{{lang}}">Download all of CLIxScience modules</a>
-    {% endwith %}
+    </a>
+    {% get_downloadpckg 'mathematics' lang as math_pkg %}
+    <a class="dropdown-item"  href="{% url 'read_file' groupid math_pkg.id  %}" Download="{{math_pkg.name}}.exe">Download all of CLIxMathematics modules
+    </a>
+    {% get_downloadpckg 'science' lang as sci_pkg %}
+    <a class="dropdown-item" href="{% url 'read_file' groupid sci_pkg.id  %}" Download="{{sci_pkg.name}}.exe">Download all of CLIxScience modules</a>
+   
   </div>
 </div>
     </div>

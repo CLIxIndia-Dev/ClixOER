@@ -1,0 +1,815 @@
+#. extracted from django_new_ta.csv
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-10-08 15:19+0530\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Translate Toolkit 3.3.0\n"
+
+#: gnowsys_ndf/ndf/gstudio_es/paginator.py:34
+msgid "That page number is not an integer"
+msgstr ""
+
+#: gnowsys_ndf/ndf/gstudio_es/paginator.py:36
+msgid "That page number is less than 1"
+msgstr ""
+
+#: gnowsys_ndf/ndf/gstudio_es/paginator.py:41
+msgid "That page contains no results"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/admin/base_site.html:7
+msgid "Studio"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/ED.html:43+gnowsys_ndf/ndf/templates/ndf/domain.html:19+gnowsys_ndf/ndf/templates/ndf/navbar.html:198+gnowsys_ndf/ndf/templates/ndf/theEDHindi.html:41+gnowsys_ndf/ndf/templates/ndf/theEDTelgu.html:39+gnowsys_ndf/ndf/templates/ndf/theEDhelp.html:38+gnowsys_ndf/ndf/templates/ndf/theMDHindi.html:46+gnowsys_ndf/ndf/templates/ndf/theMDTelgu.html:45+gnowsys_ndf/ndf/templates/ndf/theMDhelp.html:88+gnowsys_ndf/ndf/templates/ndf/theSDTelgu.html:55+gnowsys_ndf/ndf/templates/ndf/theSDhelp.html:10+gnowsys_ndf/ndf/templates/ndf/theSDhelp.html:27+gnowsys_ndf/ndf/templates/ndf/theSDhindi.html:55
+msgid "Domain"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/ED.html:44+gnowsys_ndf/ndf/templates/ndf/OER_TOC.html:96+gnowsys_ndf/ndf/templates/ndf/devlopementanworkHindi.html:25+gnowsys_ndf/ndf/templates/ndf/devlopementanworkTelgu.html:25+gnowsys_ndf/ndf/templates/ndf/help.html:41+gnowsys_ndf/ndf/templates/ndf/icon_sliderHindi.html:38+gnowsys_ndf/ndf/templates/ndf/icon_sliderTelgu.html:33+gnowsys_ndf/ndf/templates/ndf/navbar.html:194+gnowsys_ndf/ndf/templates/ndf/navbar.html:220+gnowsys_ndf/ndf/templates/ndf/theEDHindi.html:43+gnowsys_ndf/ndf/templates/ndf/theEDTelgu.html:42+gnowsys_ndf/ndf/templates/ndf/theEDhelp.html:40
+msgid "English"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/ED.html:50+gnowsys_ndf/ndf/templates/ndf/theEDHindi.html:49+gnowsys_ndf/ndf/templates/ndf/theEDTelgu.html:48
+msgid "Design And Development-English"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/Emodule_preview.html:213+gnowsys_ndf/ndf/templates/ndf/Emodule_preview.html:217+gnowsys_ndf/ndf/templates/ndf/module_cards.html:290+gnowsys_ndf/ndf/templates/ndf/module_cards.html:295
+msgid "Explore module online"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/Emodule_preview.html:261
+msgid "Student Handbook"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/Emodule_preview.html:279
+msgid "Teacher Handbook"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/Emodule_preview.html:294
+msgid "Help Video"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/Emodule_preview.html:302+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:173+gnowsys_ndf/ndf/templates/ndf/module_cards.html:471
+msgid "Share"
+msgstr "பகிர்"
+
+#: gnowsys_ndf/ndf/templates/ndf/Emodule_preview.html:346+gnowsys_ndf/ndf/templates/ndf/Emodule_preview.html:348+gnowsys_ndf/ndf/templates/ndf/Emodule_preview.html:350+gnowsys_ndf/ndf/templates/ndf/Emodule_preview.html:353+gnowsys_ndf/ndf/templates/ndf/base_templates/horizontal_card.html:32+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:315+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:317+gnowsys_ndf/ndf/templates/ndf/module_cards.html:257
+msgid "Subject"
+msgstr "படிப்ப துறை வகை களங்கள்"
+
+#: gnowsys_ndf/ndf/templates/ndf/Emodule_preview.html:360+gnowsys_ndf/ndf/templates/ndf/base_templates/lms_dashboard.html:95+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:322+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:323+gnowsys_ndf/ndf/templates/ndf/module_cards.html:272
+msgid "Grade"
+msgstr "தரங்கள் நிலை"
+
+#: gnowsys_ndf/ndf/templates/ndf/Emodule_preview.html:460+gnowsys_ndf/ndf/templates/ndf/devlopementanwork.html:38+gnowsys_ndf/ndf/templates/ndf/devlopementanworkHindi.html:54+gnowsys_ndf/ndf/templates/ndf/devlopementanworkTelgu.html:55
+msgid "Read more"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/OER_TOC.html:75
+msgid "Subjects"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/OER_TOC.html:75
+msgid "Click to filter by subjects"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/OER_TOC.html:104+gnowsys_ndf/ndf/templates/ndf/devlopementanworkHindi.html:21+gnowsys_ndf/ndf/templates/ndf/devlopementanworkTelgu.html:21+gnowsys_ndf/ndf/templates/ndf/icon_sliderHindi.html:36+gnowsys_ndf/ndf/templates/ndf/icon_sliderTelgu.html:31+gnowsys_ndf/ndf/templates/ndf/navbar.html:192+gnowsys_ndf/ndf/templates/ndf/navbar.html:223
+msgid "Math"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/OER_TOC.html:117+gnowsys_ndf/ndf/templates/ndf/devlopementanworkHindi.html:28+gnowsys_ndf/ndf/templates/ndf/devlopementanworkTelgu.html:28+gnowsys_ndf/ndf/templates/ndf/help.html:47+gnowsys_ndf/ndf/templates/ndf/icon_sliderHindi.html:40+gnowsys_ndf/ndf/templates/ndf/icon_sliderTelgu.html:35+gnowsys_ndf/ndf/templates/ndf/navbar.html:196+gnowsys_ndf/ndf/templates/ndf/navbar.html:225+gnowsys_ndf/ndf/templates/ndf/theSDTelgu.html:59+gnowsys_ndf/ndf/templates/ndf/theSDhelp.html:29+gnowsys_ndf/ndf/templates/ndf/theSDhindi.html:60
+msgid "Science"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/OER_TOC.html:132
+msgid "Digital Literacy"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/OER_TOC.html:148
+msgid "Click to see modules"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/OER_TOC.html:148+gnowsys_ndf/ndf/templates/ndf/base_templates/module.html:34+gnowsys_ndf/ndf/templates/ndf/domain.html:38
+msgid "Modules"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/OER_TOC.html:149
+msgid "Click to see interactives"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/OER_TOC.html:149+gnowsys_ndf/ndf/templates/ndf/base_templates/file.html:131
+msgid "Interactives"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/OER_TOC.html:151
+msgid "Click to see teacher and student handbooks"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/OER_TOC.html:152
+msgid "Handbooks"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/Oer_teacher_courses.html:26+gnowsys_ndf/ndf/templates/ndf/Oer_teacher_coursesHindi.html:29+gnowsys_ndf/ndf/templates/ndf/Oer_teacher_coursesTelgu.html:29
+msgid "Explore teacher courses on TiSSx website"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/Oer_teacher_courses.html:26+gnowsys_ndf/ndf/templates/ndf/Oer_teacher_coursesHindi.html:29+gnowsys_ndf/ndf/templates/ndf/Oer_teacher_coursesTelgu.html:29+gnowsys_ndf/ndf/templates/ndf/icon_slider.html:56+gnowsys_ndf/ndf/templates/ndf/icon_sliderHindi.html:67+gnowsys_ndf/ndf/templates/ndf/icon_sliderTelgu.html:59
+msgid "Explore more"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/TheCOOL.html:102
+msgid "TISS_COOL"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/TheCOOL_OER.html:473+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:110+gnowsys_ndf/ndf/templates/ndf/navbar.html:169
+msgid "TISS-COOL"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/TheCOOL_OER.html:475+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:112+gnowsys_ndf/ndf/templates/ndf/navbar.html:181
+msgid "COOL-OER"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/about.html:11
+msgid "CLix OER - About"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/about.html:31+gnowsys_ndf/ndf/templates/ndf/about.html:48+gnowsys_ndf/ndf/templates/ndf/base_templates/event_base.html:89+gnowsys_ndf/ndf/templates/ndf/base_templates/footer.html:30+gnowsys_ndf/ndf/templates/ndf/base_templates/group_dashboard.html:99+gnowsys_ndf/ndf/templates/ndf/base_templates/header.html:459+gnowsys_ndf/ndf/templates/ndf/base_templates/quiz_details.html:43+gnowsys_ndf/ndf/templates/ndf/footer.html:100+gnowsys_ndf/ndf/templates/ndf/navbar.html:233+gnowsys_ndf/ndf/templates/ndf/panelHindi.html:50
+msgid "About"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/about.html:70
+msgid "Integrate CLIxOER in your classroom"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/about.html:78
+msgid "Research"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/about.html:83
+msgid "CLIx In  Action"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/about.html:86
+msgid "Our Collaborators"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/base_templates/term.html:11+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:373+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:375
+msgid "Topics"
+msgstr "தலைப்புகள்"
+
+#: gnowsys_ndf/ndf/templates/ndf/contactForm.html:4
+msgid "Contact Us"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:162
+msgid "Explore Online"
+msgstr "ஆன்லைனில் ஆராயுங்கள்"
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:202
+msgid "Help Material"
+msgstr "உதவி பொருள்"
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:208
+msgid "Print"
+msgstr "அச்சிடு"
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:302
+msgid "MetaData"
+msgstr "மெட்டாடேட்டா"
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:304
+msgid "Website"
+msgstr "வலைத்தள இணைப்பு"
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:328
+msgid "Curriculum"
+msgstr "பாடத்திட்ட சீரமைப்பு"
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:333+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:335
+msgid "Language Support"
+msgstr "மொழி ஆதரவு"
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:340+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:342
+msgid "Device Compatibility"
+msgstr "கருவி இணையும் தன்மை"
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:346+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:347
+msgid "Offline Access"
+msgstr "ஆஃப்லைனில் அணுகல்"
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:352+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:354
+msgid "OS Compatibility"
+msgstr "அமைப்புமுறை இணையும் தன்மை"
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:357+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:358
+msgid "Accessibility"
+msgstr "எளிதில் அணுகத்தக்க தன்மை"
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:363+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:366
+msgid "License"
+msgstr "உரிமம்"
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:384+gnowsys_ndf/ndf/templates/ndf/cool_preview.html:385
+msgid "Curator"
+msgstr "கண்காணிப்பாளர்"
+
+#: gnowsys_ndf/ndf/templates/ndf/cool_preview.html:391
+msgid "Date of curation"
+msgstr "கணக்கிடப்பட்ட தேதி"
+
+#: gnowsys_ndf/ndf/templates/ndf/domain.html:38
+msgid "Click to see all modules"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/domain.html:39
+msgid "Testimonials of student and teachers"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/domain.html:40
+msgid "Voices From The Field"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/domain.html:41
+msgid "Support material to integrate CLIx OERs in the classroom"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/domain.html:44
+msgid "CLIx in the Classroom"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/domain.html:46
+msgid "Know about the design and development details of CLIx OERs"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/domain.html:49
+msgid "Design and Development Process"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/domain.html:55
+msgid "Know our team"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/domain.html:56
+msgid "Team Details"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/domain.html:58+gnowsys_ndf/ndf/templates/ndf/footer.html:104+gnowsys_ndf/ndf/templates/ndf/footer.html:121
+msgid "Contact us"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/domain.html:71
+msgid "Voices from the Field "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/footer.html:74
+msgid "Led By"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/footer.html:101
+msgid "Credits"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/footer.html:102
+msgid "Terms of service"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/footer.html:103
+msgid "Privacy policy"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/footer.html:113
+msgid ""
+"2020-2021 Tata Institute of Social Sciences and Massachusetts Institute of "
+"Technology"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/footer.html:119
+msgid "Visit our site"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/help.html:44+gnowsys_ndf/ndf/templates/ndf/theMDHindi.html:50+gnowsys_ndf/ndf/templates/ndf/theMDTelgu.html:50+gnowsys_ndf/ndf/templates/ndf/theMDhelp.html:89+gnowsys_ndf/ndf/templates/ndf/theSDhelp.html:11
+msgid "Mathematics"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/help.html:66+gnowsys_ndf/ndf/templates/ndf/theEDhelp.html:51
+msgid "Help Videos - English"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/help.html:142+gnowsys_ndf/ndf/templates/ndf/theMDhelp.html:106
+msgid "Help Videos - Mathematics"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/help.html:224+gnowsys_ndf/ndf/templates/ndf/theSDhelp.html:43
+msgid "Coming Soon!"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/module_cards.html:306
+msgid "Download offline version"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/module_cards.html:464
+msgid "Help videos"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/module_cards.html:511
+msgid "Preview the module content"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/navbar.html:147
+msgid "E-library for open educational resources"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/navbar.html:147+gnowsys_ndf/ndf/templates/ndf/oer_breadcrumbs.html:9
+msgid "E-library"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/navbar.html:167
+msgid "Connected Open Online Learning - A TISS response to COVID-19"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/navbar.html:174
+msgid "Open Education Resources"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/navbar.html:185
+msgid "Select asubject domain"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/navbar.html:189
+msgid "Select a subject domain"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/navbar.html:230
+msgid "Know about CLIx OERs"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/navbar.html:236
+msgid "Explore help material"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/navbar.html:269
+msgid "Choose the Language"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/oer_breadcrumbs.html:15
+msgid "Download offline version of all modules"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/oer_breadcrumbs.html:15
+msgid "Download All"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/panelTelgu.html:83
+msgid "CLIx OER"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/theEDhelp.html:41
+msgid "Help Videos -English"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/theLearningpage.html:286
+msgid "Learn more"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/theMDHindi.html:56+gnowsys_ndf/ndf/templates/ndf/theMDTelgu.html:56
+msgid "Design And Development- Mathemactics"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/theMDhelp.html:91+gnowsys_ndf/ndf/templates/ndf/theSDhelp.html:13
+msgid "Help Videos - Mathemactics"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/theSDTelgu.html:64+gnowsys_ndf/ndf/templates/ndf/theSDhindi.html:65
+msgid "Design And Development-Science"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/theSDhelp.html:34
+msgid "Help Videos -Science"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/ndf/thehelpmodal.html:25
+msgid "Help Videos"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/notification/base.html:4
+msgid "notices"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/notification/email_body.txt:1
+msgid "You have received the following notice from the site: "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/notification/email_subject.txt:1
+msgid "[%(current_site)s] %(message)s"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/notification/notice_settings.html:8+gnowsys_ndf/ndf/templates/notification/notice_settings.html:11
+msgid "Notification Settings"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/notification/notice_settings.html:17
+msgid "Notice"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/notification/notice_settings.html:18
+msgid "You do not have a verified email address to which notices can be sent."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/notification/notice_settings.html:18
+msgid "Add one "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/notification/notice_settings.html:18
+msgid "now"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/notification/notice_settings.html:27
+msgid "Notification Type"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/notification/short.txt:5
+msgid "Activity notification from"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/online_status/example.html:4
+msgid "Users online"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/online_status/example.html:7
+msgid "Status for user "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/online_status/example.html:10
+msgid "My status "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activate.html:6+gnowsys_ndf/ndf/templates/registration/activation_complete.html:4
+msgid "Activation complete"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activate.html:8
+msgid "Activation problem"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activate.html:19
+msgid "Thanks"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activate.html:19
+msgid "Your activation complete!"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activate.html:22
+msgid "You may"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activate.html:22
+msgid "login"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activate.html:22
+msgid "using your email and password."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activate.html:27
+msgid ""
+"Oops! It seems that your activation key is invalid. Please check the url or "
+"try to reset your password again. "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_complete.html:13
+msgid "Account successfully activated."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_complete.html:14+gnowsys_ndf/ndf/templates/registration/password_reset_complete.html:14
+msgid "Please "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_complete.html:14+gnowsys_ndf/ndf/templates/registration/password_reset_complete.html:14
+msgid "Sign In"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_complete.html:14+gnowsys_ndf/ndf/templates/registration/password_reset_complete.html:14
+msgid "here."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_email.html:13
+msgid "Account registration"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_email.html:16
+msgid ""
+"You (or someone pretending to be you) have asked to register an account at: "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_email.html:17
+msgid ""
+"If this wasn't you, please ignore this email and your address will be "
+"removed from our records."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_email.html:21
+msgid ""
+"To activate this account, please click the following link within the next "
+"two days."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_email.html:26+gnowsys_ndf/ndf/templates/registration/activation_email.txt:11
+msgid "Sincerely"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_email.html:27
+msgid " \"%(site.name|capfirst)s Team\" "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_email.txt:5
+msgid ""
+"You (or someone pretending to be you) have asked to register an account at "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_email.txt:6
+msgid ""
+"If this wasn't you, please ignore this email and your details will be "
+"removed from our records."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_email.txt:8
+msgid ""
+"To activate this account, please click the following link within the next"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_email.txt:8
+msgid "days"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_email.txt:12
+msgid "Team"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/activation_email_subject.txt:3
+msgid "Account registration for"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/login.html:28
+msgid "Log In"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/login.html:36+gnowsys_ndf/ndf/templates/registration/login_clix.html:38
+msgid "Either your email or password is incorrect !"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/login.html:73+gnowsys_ndf/ndf/templates/registration/login_clix.html:103
+msgid "Recover your password"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/login.html:73+gnowsys_ndf/ndf/templates/registration/login_clix.html:103
+msgid "Forgot your password?"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/login.html:96+gnowsys_ndf/ndf/templates/registration/login_clix.html:115
+msgid "Click here to register"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/login.html:97
+msgid "Don't have an account? Register yourself now."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/login_clix.html:33
+msgid "LogIn"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/login_clix.html:116
+msgid "Don't have an account?"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/logout.html:4
+msgid "Logged out"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/logout.html:11
+msgid "You have sucessfully logged out."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/logout.html:12
+msgid ""
+"Thank you for visiting our website. Please return often to take advantage of "
+"this platform."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_change_done.html:7
+msgid "Password successfully changed"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_change_form.html:26
+msgid "Submit"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_complete.html:5
+msgid "Password reset complete"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_complete.html:13
+msgid "Your password has been reset successfully."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_confirm.html:4
+msgid "Confirm password reset"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_confirm.html:43+gnowsys_ndf/ndf/templates/registration/registration_form.html:63
+msgid "Either both passwords doesn't match or doesn't satisfy the criteria!!!"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_confirm.html:66+gnowsys_ndf/ndf/templates/registration/registration_form.html:110
+msgid "NOTE: "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_confirm.html:68+gnowsys_ndf/ndf/templates/registration/registration_form.html:112
+msgid "Password must contain atleast 8 characters,"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_confirm.html:69+gnowsys_ndf/ndf/templates/registration/registration_form.html:113
+msgid "One uppercase letter, and"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_confirm.html:70+gnowsys_ndf/ndf/templates/registration/registration_form.html:114
+msgid "One numeral"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_confirm.html:88
+msgid "Set password"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_done.html:4+gnowsys_ndf/ndf/templates/registration/password_reset_email_subject.txt:2
+msgid "Password reset"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_done.html:11
+msgid "Please check your email."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_done.html:12
+msgid "An email has been sent to email-ID associated with your account."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_done.html:13
+msgid "Please be patient"
+msgstr ""
+"the delivery of email may be delayed. Remember to confirm that the email "
+"that you entered is correct and to check your junk or spam folder or filter "
+"if you do not receive this email."
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_email.html:4
+msgid "Greetings "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_email.html:5
+msgid ""
+"You are receiving this email because you requested that your password be "
+"reset on"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_email.html:7
+msgid "If you do not wish to reset your password, please ignore this message."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_email.html:9
+msgid ""
+"To reset your password, please click the following link, or copy and paste "
+"it into your web browser:"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_email.html:12
+msgid "Your username, in case you've forgotten:"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_email.html:14
+msgid "Best regards,"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_email.html:15
+msgid "Management"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_error_form.html:5+gnowsys_ndf/ndf/templates/registration/password_reset_error_form.html:72+gnowsys_ndf/ndf/templates/registration/password_reset_form.html:5+gnowsys_ndf/ndf/templates/registration/password_reset_form.html:65
+msgid "Reset password"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_error_form.html:30+gnowsys_ndf/ndf/templates/registration/password_reset_form.html:30
+msgid "Forgot password? Don't worry..."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_error_form.html:37+gnowsys_ndf/ndf/templates/registration/password_reset_form.html:37
+msgid ""
+"Password reset instructions will be sent to the email address associated "
+"with your account."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_error_form.html:44
+msgid "Invalid email-ID, Please try again."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_error_form.html:59
+msgid "Please type your valid "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_error_form.html:59+gnowsys_ndf/ndf/templates/registration/password_reset_form.html:52
+msgid "email address"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_error_form.html:59+gnowsys_ndf/ndf/templates/registration/password_reset_form.html:52
+msgid "below:"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/password_reset_form.html:52
+msgid "Please type your "
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/registration_closed.html:4
+msgid "Registration Closed"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/registration_closed.html:10
+msgid "Sorry, registration is closed!"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/registration_complete.html:4
+msgid "Activation email sent"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/registration_complete.html:11
+msgid "Account creation successful."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/registration_complete.html:12
+msgid ""
+"Please activate your account by clicking on the link provided in the email "
+"you will receive."
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/registration_form.html:5
+msgid "Register for an account"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/registration_form.html:53
+msgid "Register a New User Account"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/registration_form.html:136
+msgid "Occupation"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/registration_form.html:143
+msgid "- - - Select Occupation - - -"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/registration_form.html:157
+msgid "Organization"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/registration_form.html:172
+msgid "I agree to the terms and conditions"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/registration_form.html:185
+msgid "Send activation email"
+msgstr ""
+
+#: gnowsys_ndf/ndf/templates/registration/user-icon-to-name.html:17
+msgid "Select username"
+msgstr ""
+
+#: gnowsys_ndf/ndf/views/email_registration.py:26
+msgid "User with same username exists. Please provide another username!"
+msgstr ""
+
+#: gnowsys_ndf/ndf/views/email_registration.py:43
+msgid "Email"
+msgstr ""
+
+#: gnowsys_ndf/ndf/views/email_registration.py:48
+msgid "Username"
+msgstr ""
+
+#: gnowsys_ndf/ndf/views/email_registration.py:53
+msgid "Password"
+msgstr ""
+
+#: gnowsys_ndf/ndf/views/email_registration.py:58
+msgid "Password (repeat)"
+msgstr ""
+
+#: gnowsys_ndf/ndf/views/email_registration.py:73
+msgid "Please enter a valid name."
+msgstr ""
+
+#: gnowsys_ndf/ndf/views/email_registration.py:82
+msgid "The two password fields didn't match."
+msgstr ""

@@ -1,3 +1,8 @@
+
+
+
+
+
 {% load i18n %}
 {% load ndf_tags %}
 <!-- navbar 
@@ -44,6 +49,10 @@ text-decoration: blink;
     font-size: 100%;
     color: #713558;
 }
+.old-bv {
+    font-size: 14px;
+    background-color: #212121;
+}
 #toolbar{
 width:100%;
 display:inline-block;
@@ -73,6 +82,15 @@ background-color: none;
  </div>
 -->
 
+  <div class="collapse" id="collapseExample">
+               
+                    <span class="float-right">      <button class="btn text-white showhide right" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+                            X
+                          </button></span> 
+                          <span class="d-block px-3 py-2 text-center text-bold text-white old-bv"> Please give us feedback and help us improve. Take our 
+
+ <a href="https://forms.gle/32RNzpNnVbvzDPXa6" target="_blank"> <strong> quick survey. </strong> </a></span>          
+            </div>
 <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
 
   <div class="carousel-inner">
@@ -102,14 +120,14 @@ background-color: none;
 </div>
 <nav class="navbar  navbar-expand-lg sticky-top navbar-light bg-light justify-content-center" id="navbar">
   {% if title == 'COOL' %} 
-  <a class="navbar-brand float-left" href="{% url 'e-library' group_id  %}" tabindex="1"><img src="/static/ndf/images/COOLLOGO.png" class="img-fluid" width="125px"></a>
+  <a class="navbar-brand float-left" href="{% url 'e-library' groupid  %}" tabindex="1"><img src="/static/ndf/images/COOLLOGO.png" class="img-fluid" alt="CLIX COOL LOGO FOR TISS COOL PAGE"  width="125px"></a>
 
  {% elif title == 'COOL-OER' %}
-  <a class="navbar-brand float-left" href="{% url 'e-library' group_id  %}" tabindex="1"><img src="/static/ndf/images/COOLLOGO.png" class="im\
-g-fluid" width="125px"></a>
+  <a class="navbar-brand float-left" href="{% url 'e-library' groupid  %}" tabindex="1"><img src="/static/ndf/images/COOLLOGO.png" class="im\
+g-fluid" alt="CLIX COOL LOGO FOR TISS COOL PAGE"  width="125px"></a>
 
 {% else %}
-   <a class="navbar-brand float-left" href="{% url 'e-library' group_id  %}" tabindex="1"><img src="/static/ndf/images/Clix_logo.png" class="img-fluid" width="200px"></a>
+   <a class="navbar-brand float-left" href="{% url 'e-library' groupid  %}" tabindex="1"><img src="/static/ndf/images/Clix_logo.png" class="img-fluid" alt="CLix Logo Elibrary"  width="200px"></a>
 {% endif %}
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -125,7 +143,7 @@ g-fluid" width="125px"></a>
 </li>
 -->
   <li class="nav-item first-fliter-search active">
-        <a class=" py-3 nav-link  home fun-name " tabindex="2"  href="{% url 'e-library' group_id  %}" data-toggle="tooltip" 
+        <a class=" py-3 nav-link  home fun-name " tabindex="2"  href="{% url 'e-library' groupid  %}" data-toggle="tooltip" 
   title="{% trans  "E-library for open educational resources"%}" > <i class="fas fa-home solid"></i>{% trans 'E-library' %} <span class="sr-only">(current)</span></a>
            </li>
 <!--     
@@ -147,20 +165,24 @@ g-fluid" width="125px"></a>
 
         <a class=" ml-3 py-3 nav-link fun-name" tabindex="3" href="{% url 'coolpage' %}" style="position: relative;"  data-toggle="tooltip"
 title="{% trans "Connected Open Online Learning - A TISS response to COVID-19" %}" >
- <i class="fas fa-laptop-house solid" data-toggle="tooltip" 
-title="{% trans "Connected Open Online Learning - A TISS response to COVID-19" %}" ></i> {% trans 'TISS-COOL' %}<span class="blink "> New</span>  </a>
+ <i class="fas fa-chalkboard-teacher" data-toggle="tooltip" 
+ ></i> {% trans 'TISS-COOL' %}<span class="blink "> New</span>  </a>
       </li>
  <li class="nav-item ">
 
         <a class=" ml-3 py-3 nav-link fun-name" tabindex="3" href="{% url 'cooloers' %}" style="position: relative;" data-toggle="tooltip"
 title="{% trans "Open Education Resources" %}">
- <i class="fas fa-laptop-house " data-toggle="tooltip"
-title="{% trans "Open Education Resources" %}" ></i> {% trans 'COOL-OER' %}<span class="blink "> New</sp\
-an>  </a>
+ <i class="fas fa-laptop " data-toggle="tooltip"
+ ></i>
+<!--
+<img src="/static/ndf/noun_online education_1619863.svg" width="16" height="15"/>
+-->
+
+ {% trans 'COOL-OER' %}<span class="blink "> New</span>  </a>
       </li>
 
        <li class="nav-item dropdown">
-        <a class=" py-3 nav-link  dropdown-toggle ml-3 fun-name" tabindex="3" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <a class=" py-3 nav-link  dropdown-toggle ml-3 fun-name" tabindex="3" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{% trans "Select asubject domain" %}"  >
 
 
 
@@ -195,21 +217,23 @@ an>  </a>
 
 <!--          <a href="{% url 'domain_page' group_id 'Mathematics' %}" id="maths" class="dropdown-item domain_name" >Math</a>
 -->  
-          <a href="{% url 'domain_page' group_id 'English' %}" id="english" class="dropdown-item domain_name  " ><i class="fas fa-font" > </i>{% trans 'English' %} </a>
+          <a href="{% url 'domain_page' groupid 'English' %}" id="english" class="dropdown-item domain_name  " ><i class="fas fa-font" > </i>{% trans 'English' %} </a>
 
-          <a href="{% url 'domain_page' group_id 'Mathematics' %}" id="maths" class="dropdown-item domain_name " ><i class="fas fa-calculator" >
+          <a href="{% url 'domain_page' groupid 'Mathematics' %}" id="maths" class="dropdown-item domain_name " ><i class="fas fa-calculator" >
 </i>{% trans 'Math' %}  </a>
 
-          <a href="{% url 'domain_page' group_id 'Science' %}" id="science" class="dropdown-item domain_name " > <i class="fas fa-flask"> </i>{% trans 'Science' %} </a>
+          <a href="{% url 'domain_page' groupid 'Science' %}" id="science" class="dropdown-item domain_name " > <i class="fas fa-flask"> </i>{% trans 'Science' %} </a>
         </div>
       </li>
       <li class="nav-item ">
 	
-        <a class=" ml-3 py-3  nav-link fun-name" tabindex="3" href="{% url 'about' group_id  %}"> <i class="fas fa-info-circle" data-toggle="tooltip"
- title="{% trans "Know about CLIx OERs" %}" ></i> {% trans 'About' %}</a>
+        <a class=" ml-3 py-3  nav-link fun-name" tabindex="3"  title="{% trans "Know about CLIx OERs" %}" data-toggle="tooltip" href="{% url 'about' groupid  %}">
+ <i class="fas fa-info-circle" data-toggle="tooltip" ></i>
+
+ {% trans 'About' %}</a>
       </li>
       <li class="nav-item ">
-          <a class=" ml-2 py-3 nav-link fun-name" tabindex="4"  href="{% url 'help' group_id %}" title="Help"> <i data-toggle="tooltip" class=" far fa-question-circle" title="{% trans  "Explore help material" %}">
+          <a class=" ml-2 py-3 nav-link fun-name" tabindex="4"  href="{% url 'help' groupid %}" title="{% trans  "Explore help material" %}" data-toggle="tooltip"  title="Help"> <i data-toggle="tooltip" class=" far fa-question-circle" >
 </i> {% trans 'Help' %} </a>
         </li>
 <!--       <form class="form-inline my-2 my-md-0 ml-3  fun-name">
@@ -242,8 +266,10 @@ an>  </a>
 
 </li>
 -->
-<div   class="dropdown show py-3  fun-name" title="{% trans "Choose the Language" %}"  >
-  <a class=" dropdown-toggle"  role="button" id="dropdownMenuLink" data-toggle="dropdown"  aria-haspopup="true" aria-expanded="false">
+<div   class="dropdown show py-3  fun-name" title="{% trans "Choose the Language" %}"  data-toggle="tooltip"  >
+  <a class=" dropdown-toggle"  role="button" id="dropdownMenuLink" data-toggle="dropdown"  aria-haspopup="true" aria-expanded="false"
+
+     >
                     {{request.LANGUAGE_CODE|get_header_lang}}    
   </a>
 
@@ -300,7 +326,7 @@ an>  </a>
 <!-- Navbar -->
 </nav> 
 <style>
-.carousel-caption {
+q.carousel-caption {
     position: absolute;
     right: 15%;
     bottom: 54% !important;
@@ -362,7 +388,28 @@ an>  </a>
 if (location.hash) shiftWindow();
 window.addEventListener("hashchange", shiftWindow);
 */
+/*
+$(document).ready(function(){
+  if(!Cookies.get('hide-div')){
+      $('#collapseExample').collapse({
+  show: true})
+}  
+  $(".showhide").click(function () {
+      Cookies.set('hide-div', true, { expires: 1 });
+  });
+});
+*/
+$(window).on('load',function(){
+  if (!sessionStorage.getItem('hide-bar')){
+   $('#collapseExample').collapse({
+  show: true});
+ $(".showhide").click(function () {
+          sessionStorage.setItem('hide-bar', 'true');
+  });}
+});
 
+//$('#collapseExample').collapse({
+ //show: true })
 
 $('.navbar-nav .nav-link  .fun-name').each(function(){
     if(window.location.href.indexOf($(this).find('a:first').attr('href'))>-1)

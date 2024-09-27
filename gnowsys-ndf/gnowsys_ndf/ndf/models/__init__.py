@@ -7,27 +7,27 @@ from .gsystem_type import *
 from .meta_type import *
 from .process_type import *
 from .group import *
-from .author import *
-from .counter import *
+#from .author import *
+#from .counter import *
 from .triple import *
 from .gattribute import *
 from .grelation import *
 from .buddy import *
 from .filehive import *
-from .benchmark import *
-from .history_manager import *
+#from .benchmark import *
+#from .history_manager import *
 from .analytics import *
 from .models_utils import *
 from .db_utils import *
 from .hit_counters import *
 
-node_collection = db["Nodes"].Node
-triple_collection = db["Triples"].Triple
+node_collection = db["Nodes"]
+triple_collection = db["Triples"]
 benchmark_collection = db["Benchmarks"]
-filehive_collection = db["Filehives"].Filehive
-buddy_collection = db["Buddies"].Buddy
-counter_collection = db["Counters"].Counter
+filehive_collection = db["Filehives"]
+buddy_collection = db["Buddies"]
+counter_collection = db["Counters"]
 gridfs_collection = db["fs.files"]
 # chunk_collection = db["fs.chunks"]
 
-from ..signals import *
+#from ..signals import *
