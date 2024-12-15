@@ -24,7 +24,7 @@ ipython-genutils==0.2.0
 jedi==0.17.2
 keyring==10.6.0
 keyrings.alt==3.0
-lxml==4.6.2
+lxml==4.9.1
 mongoengine==0.22.1
 memcache==0.4.0
 mongokit==0.9.1.1
